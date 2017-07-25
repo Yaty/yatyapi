@@ -1,0 +1,20 @@
+{
+  "name": "yaty api",
+  "version": "1.0.0",
+  "description": "Climbing facilities management application API",
+  "author": "Hugo Da Roit <contact@hdaroit.fr>",
+  "private": true,
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.15.3",
+    "jsonwebtoken": "^7.4.1",
+    "mongoose": "^4.11.4",
+    "morgan": "^1.8.2",
+    "winston": "^2.3.1"
+  },
+  "engines": {
+    "node": ">= 4.0.0",
+    "npm": ">= 3.0.0"
+  }
+}
