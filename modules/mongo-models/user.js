@@ -6,12 +6,21 @@ const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
 const SALT_WORK_FACTOR = 10;
 
+const GymSchema = new Schema({
+    name: { type: String, required: true },
+    rank: { type: String, required: true, enum: ['climber', 'routesetter', 'owner'], default: 'climber' },
+});
+
 const UserSchema = new Schema({
-    name: { type: String, required: false },
+    name: { type: String, required: true },
+    lastname: { type: String, required: true },
     email: { type: String, required: true, index: { unique: true } },
     password: { type: String, required: true },
-    jwt: { type: String, required: true },
-    connectionsAttempts: { type: Number, default: 0, required: true }
+    gyms: { type: [GymSchema], required: false, default: [] },
+    phone: { type: String, required: false, validate: { validator: v => { return /^[0-9]{10}$/.test(v) }, message: '{VALUE} is not a valid phone number!' } },
+    address: { type: String, required: false },
+    lastLogin: { type: Date, required: true },
+    tokenId: { type: String, required: false }
 });
 
 UserSchema.pre('save', function(next) {
@@ -33,10 +42,6 @@ UserSchema.pre('save', function(next) {
             next();
         });
     });
-});
-
-UserSchema.post('save', (user) => {
-   logger.debug('New user', { user });
 });
 
 UserSchema.methods.comparePassword = function(candidatePassword, cb) {
