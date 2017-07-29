@@ -2,47 +2,52 @@ const express = require('express');
 const router = express.Router();
 const mongodb = require('../modules/mongodb');
 const logger = require('../modules/logger');
-const jwt = require('jsonwebtoken');
 const config = require('../config');
-
-router.post('/login', (req, res, next) => {
-   mongodb.login(req.body.email, req.body.password)
-       .then((isLoginSuccessful) => {
-            if (isLoginSuccessful) {
-                logger.debug('Login successful', { email: req.body.email, password: req.body.password });
-                const token = jwt.sign({ email: req.body.email, password: req.body.password }, config.secret);
-                return res.status(200).json({
-                    token
-                });
-            } else {
-                logger.debug('Login unsuccessful', { email: req.body.email, password: req.body.password });
-                return res.status(401).send();
-            }
-       })
-       .catch((e) => {
-            logger.info('Error while login', { email: req.body.email, password: req.body.password, error: e });
-            return next(e);
-       });
-});
+const middlewares = require('../modules/middlewares');
+const JWTCheck = middlewares.jwtCheck;
+const JWTSign = middlewares.jwtSign;
 
 router.post('/register', (req, res, next) => {
-    jwt.sign({ email: req.body.email, password: req.body.password }, config.secret, (e, token) => {
-        if (e) {
-            logger.error('Error when creating a JWT token', { name: req.body.name, email: req.body.email, password: req.body.password, token, error: e })
+    mongodb.register(req.body.name, req.body.lastname, req.body.email, req.body.password)
+        .then(() => {
+            logger.debug('Registration successful', { name: req.body.name, lastname: req.body.lastname, email: req.body.email });
+            return res.sendStatus(201);
+        })
+        .catch((e) => {
+            logger.info('Registration unsuccessful', { name: req.body.name, lastname: req.body.lastname, email: req.body.email, error: e });
             return next(e);
-        }
+        });
+});
 
-        mongodb.register(req.body.email, req.body.password, token)
-            .then(() => {
-                logger.debug('Registration successful', { name: req.body.name, email: req.body.email, password: req.body.password, token });
-                return res.status(201).json({
-                    token
-                });
-            })
-            .catch((e) => {
-                logger.info('Registration unsuccessful', { name: req.body.name, email: req.body.email, password: req.body.password, token, error: e });
-                return next(e);
-            });
+router.post('/login', JWTSign, (req, res, next) => {
+    mongodb.login(req.body.email, req.body.password)
+        .then((user) => {
+            if (user === null) {
+                logger.debug('Login unsuccessful', { email: req.body.email, pass: req.body.password });
+                return res.sendStatus(401);
+            } else if (user.isMatch) {
+                const token = res.locals.token; // set by the auth middleware
+                return res.json({ token, gyms: user.gyms });
+            } else {
+                throw "Unknown error while login.";
+            }
+        })
+        .catch((e) => {
+            logger.info('Error while login', { email: req.body.email, error: e });
+            return next(e);
+        });
+});
+
+router.get('/refresh', JWTCheck, (req, res, next) => {
+    return res.status(200).json({
+        status: 'success'
+    });
+});
+
+router.get('/user', JWTCheck, (req, res, next) => {
+    // TODO
+    return res.status(200).json({
+        status: 'success'
     });
 });
 
