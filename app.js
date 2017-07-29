@@ -1,28 +1,22 @@
 const config = require('./config');
-const express = require('express');
-const bodyparser = require('body-parser');
-const app = express();
-const cors = require('cors');
-const cookieparser = require('cookie-parser');
 const logger = require('./modules/logger');
-const morgan = require('morgan');
-const usersApi = require('./routers/users');
-const authApi = require('./routers/auth');
+const express = require('express');
+const app = express();
 
 // TODO : remove once in production
-app.use(cors());
+app.use(require('cors')());
 
-app.use(cookieparser());
-
-app.use(bodyparser.json());
+app.use(require('body-parser').json());
 
 // Logging HTTP request
-app.use(morgan("combined", { stream: { write: message => logger.info(message.trim()) }}));
+app.use(require('morgan')("combined", { stream: { write: message => logger.info(message.trim()) }}));
 
 // Routes
 app.use('/static', express.static(config.staticPath));
-app.use('/api/users', usersApi);
-app.use('/api/auth', authApi);
+app.use('/auth', require('./routers/auth'));
+
+// Error handler
+app.use(require('./modules/middlewares').errorHandler);
 
 // Listening
 app.listen(config.port, () => {
