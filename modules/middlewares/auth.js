@@ -18,19 +18,27 @@ const checkJWT = (req, res, next) => {
 
     try {
         const token = getTokenFromHeaders(req.headers);
-        jwt.verify(token, config.token.secret, (e, decodedToken) => {
-            if (e) throw "Error when verifying token : " + token;
 
-            // MongoDB check : useless ?
-            mongodb.isUserExistById(decodedToken.userId)
-                .then(() => {
-                    logger.debug("Access granted to " + decodedToken.email + " for " + req.originalUrl);
-                    return next();
-                })
-                .catch(e => {
-                    throw e;
-                });
-        });
+        jwt.verify(token, config.token.secret,
+            {
+                audience: config.token.options.audience,
+                issuer: config.token.options.issuer,
+            },
+            (e, decodedToken) => {
+                if (e) throw "Error when verifying token : " + token + ' : ' + e;
+
+                // MongoDB check : useless ?
+                mongodb.isUserExistById(decodedToken.userId)
+                    .then((user) => {
+                        if (user.tokenId !== decodedToken.jti) return Promise.reject("Invalid token : " + tokenId + ' / ' + decodedToken.jwtid);
+                        logger.debug("Access granted to " + decodedToken.email + " for " + req.originalUrl);
+                        res.locals.email = decodedToken.email;
+                        return next();
+                    })
+                    .catch(e => {
+                        throw e;
+                    });
+            });
     } catch (e) {
         logger.error("Error when checking JWT", { error: e });
         return res.status(401).send();

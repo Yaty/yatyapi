@@ -3,35 +3,37 @@ const logger = require('./logger');
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 const User = require('./mongo-models/user');
+const CustomError = require('./CustomError');
 
 mongoose.connect(config.mongodb, { useMongoClient: true }, (e) => {
     if (e) {
-        logger.error('Can\'t connect to MongoDB', { error: e });
-        throw e;
+        throw new CustomError(CustomError.TYPES.MONGODB_ERRORS.CONNECTION_ERROR, "", e);
     }
     logger.info('Successfully connected to MongoDB.');
 });
 
-const login = (email, password) => {
+const getUserByEmail = (email) => {
     return new Promise((resolve, reject) => {
         User.findOne({ email }, (err, user) => {
-            if (err) {
-                logger.error('Can\'t find a user by email', { email, password, err });
-                return reject(500);
-            }
-
-            if (user === null || typeof user === 'undefined') {
-                return resolve(null);
-            }
-
-            user.comparePassword(password, (err, isMatch) => {
-                if (err) {
-                    logger.error('Can\'t compare password', { email, password, isMatch, err });
-                    return reject(500);
-                }
-                return resolve({ isMatch, id: user.id, gyms: user.gyms });
-            });
+            if (err) return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.UNKNOWN_USER, email));
+            if (user === null || typeof user === 'undefined') return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.UNKNOWN_USER, email));
+            return resolve(user);
         });
+    });
+};
+
+const login = (email, password) => {
+    return new Promise((resolve, reject) => {
+        getUserByEmail(email)
+            .then(user => {
+                user.comparePassword(password, (err, isMatch) => {
+                    if (err) return reject(new CustomError(CustomError.TYPES.JWT_ERRORS.COMPARE_PASSWORDS_ERROR, email, err));
+                    return resolve({ isMatch, id: user.id, gyms: user.gyms });
+                });
+            })
+            .catch(e => {
+                return reject(new CustomError(e, "Error while login."));
+            });
     });
 };
 
@@ -39,10 +41,7 @@ const register = (name, lastname, email, password) => {
     return new Promise((resolve, reject) => {
        const newUser = new User({ name, lastname, email, password, lastLogin: new Date() });
        newUser.save((e) => {
-           if (e) {
-               logger.error('Can\'t register', { error: e });
-               return reject(500);
-           }
+           if (e) return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.SAVE_ERROR, "Registration", e));
            return resolve();
        });
     });
@@ -50,74 +49,101 @@ const register = (name, lastname, email, password) => {
 
 const update = (name, lastname, email, oldPassword, newPassword, phone, address) => {
     return new Promise((resolve, reject) => {
-        User.findOne({ email }, (err, user) => {
-            if (err || user === null || typeof user === 'undefined') {
-                logger.error('Can\'t find a user by email', { name, lastname, email, phone, address, err });
-                return reject(404);
-            }
-
-            user.comparePassword(oldPassword, (err, isMatch) => {
-                if (err) {
-                    logger.error('Can\'t compare password', { name, lastname, email, phone, address, isMatch, err });
-                    return reject(500);
-                }
-                if (isMatch) {
-                    user.name = name;
-                    user.lastname = lastname;
-                    user.password = newPassword;
-                    user.phone = phone;
-                    user.address = address;
-                    user.save((err) => {
-                        if (err) {
-                            if (err.name === 'ValidationError') {
-                                logger.error('Bad input to update user', { name, lastname, email, phone, address, err});
-                                return reject(400);
+        getUserByEmail(email)
+            .then(user => {
+                user.comparePassword(oldPassword, (err, isMatch) => {
+                    if (err) return reject(new CustomError(CustomError.TYPES.JWT_ERRORS.COMPARE_PASSWORDS_ERROR, email, err));
+                    if (isMatch) {
+                        user.name = name;
+                        user.lastname = lastname;
+                        user.password = newPassword;
+                        user.phone = phone;
+                        user.address = address;
+                        user.save((err) => {
+                            if (err) {
+                                if (err.name === 'ValidationError') return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.VALIDATION_ERROR, user, err));
+                                return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.SAVE_ERROR, "Updating : " + user, err));
                             } else {
-                                logger.error('Can\'t update user', { name, lastname, email, phone, address, err});
-                                return reject(500);
+                                logger.debug('User updated', { email, name, lastname, phone, address });
+                                return resolve();
                             }
-                        } else {
-                            logger.debug('User updated', { email, name, lastname, phone, address });
-                            return resolve();
-                        }
-                    })
-                } else {
-                    return reject(401);
-                }
+                        });
+                    } else return reject(new CustomError(CustomError.TYPES.AUTH_ERRORS.BAD_PASSWORD, email));
+                });
+            })
+            .catch(e => {
+                return reject(new CustomError(e, "Error while updating : " + email));
             });
-        });
+    });
+};
+
+const setUserTokenId = (email, tokenId) => {
+    return new Promise((resolve, reject) => {
+        getUserByEmail(email)
+            .then(user => {
+                user.tokenId = tokenId;
+                user.save((err) => {
+                    if (err) return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.SAVE_ERROR, "Token ID saving failed", err));
+                    return resolve();
+                });
+            })
+            .catch(e => {
+               return reject(new CustomError(e, "Error while setting user token id : " + email + ' / ' + tokenId));
+            });
+    });
+};
+
+const getUserInfoByEmail = (email) => {
+    return new Promise((resolve, reject) => {
+        getUserByEmail(email)
+            .then(user => {
+                return resolve({
+                   email: user.email,
+                   name: user.name,
+                   lastname: user.lastname,
+                   gyms: user.gyms,
+                   phone: user.phone,
+                   address: user.address,
+                   lastLogin: user.lastLogin
+                });
+            })
+            .catch(e => {
+                return reject(new CustomError(e, "Error while getting user info by email : " + email));
+            });
     });
 };
 
 const isUserExistById = (id) => {
     return new Promise((resolve, reject) => {
         User.findOne({ id }, (err, user) => {
-          if (err) {
-              logger.error('Can\'t find user by id', { error: err });
-              return reject(500);
-          }
-          return resolve();
+            if (err) return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.UNKNOWN_USER, id));
+            if (user === null || typeof user === 'undefined') return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.UNKNOWN_USER, id));
+            return resolve(user);
         });
     });
 };
 
-const setUserTokenId = (email, tokenId) => {
+const removeTokenFromUserByEmail = (email) => {
     return new Promise((resolve, reject) => {
-        User.findOne({ email }, (err, user) => {
-            if (err) {
-                logger.error('Can\'t find user by email', { error: err });
-                return reject(500);
-            }
-            user.tokenId = tokenId;
-            user.save((err) => {
-               if (err) {
-                   logger.error('Can\'t save token email', { error: err });
-                   return reject(500);
-               }
-               return resolve();
-            });
-        });
+       getUserByEmail(email)
+           .then(user => {
+               user.tokenId = null;
+               user.save((err) => {
+                    if (err) return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.SAVE_ERROR, "Updating : " + user, err));
+                    return resolve();
+               });
+           })
+           .catch(e => {
+               return reject(new CustomError(e, "Error while removing token from user : " + email));
+           });
     });
 };
 
-module.exports = { login, register, isUserExistById, setUserTokenId};
+module.exports = {
+    login,
+    register,
+    isUserExistById,
+    setUserTokenId,
+    getUserInfoByEmail,
+    removeTokenFromUserByEmail
+};
