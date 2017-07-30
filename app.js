@@ -22,3 +22,8 @@ app.use(require('./modules/middlewares').errorHandler);
 app.listen(config.port, () => {
     logger.info(`Server launched on ${config.port}`);
 });
+
+// Logging unhandled rejected promises
+process.on('unhandledRejection', (reason) => {
+    logger.warn('Unhandled promise rejection', { reason });
+});
