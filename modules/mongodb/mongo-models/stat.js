@@ -6,7 +6,11 @@ Written by Hugo Da Roit <contact@hdaroit.fr>, 2017
 Based on Vue-admin from Fangdun Cai <cfddream@gmail.com>
 */
 
-module.exports = {
-    errorHandler: require('./error'),
-    auth: require('./auth')
-};
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+mongoose.Promise = global.Promise;
+
+const StatsSchema = new Schema({
+});
+
+module.exports = mongoose.model('Stats', StatsSchema);

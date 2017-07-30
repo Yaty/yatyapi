@@ -26,6 +26,6 @@ const logger = new (winston.Logger)({
     ]
 });
 
-logger.level = require('../config').loggerLevel;
+logger.level = require('../../config').loggerLevel;
 
 module.exports = logger;

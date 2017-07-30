@@ -1,10 +1,10 @@
-const config = require('../../config');
-const logger = require('../logger');
+const config = require('../../../config');
 const mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
 const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt');
 const SALT_WORK_FACTOR = 10;
+const CustomError = require('../../errors').CustomError;
+mongoose.Promise = global.Promise;
 
 const GymSchema = new Schema({
     name: { type: String, required: true },
@@ -31,11 +31,11 @@ UserSchema.pre('save', function(next) {
 
     // generate a salt
     bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
-        if (err) return next(err);
+        if (err) return next(new CustomError(CustomError.TYPES.BCRYPT_ERRORS.GEN_SALT_ERROR, salt, err));
 
         // hash the password using our new salt
         bcrypt.hash(user.password, salt, function(err, hash) {
-            if (err) return next(err);
+            if (err) return next(new CustomError(CustomError.TYPES.BCRYPT_ERRORS.HASH_ERROR, salt, err));
 
             // override the cleartext password with the hashed one
             user.password = hash;
@@ -46,7 +46,7 @@ UserSchema.pre('save', function(next) {
 
 UserSchema.methods.comparePassword = function(candidatePassword, cb) {
     bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
-        if (err) return cb(err);
+        if (err) return cb(new CustomError(CustomError.TYPES.BCRYPT_ERRORS.COMPARE_PASSWORDS_ERROR, isMatch, err));
         cb(null, isMatch);
     });
 };

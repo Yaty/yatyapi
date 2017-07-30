@@ -1,11 +1,16 @@
 const config = require('./config');
 const logger = require('./modules/logger');
+const cron = require('cron');
 const express = require('express');
 const app = express();
 
-// TODO : remove once in production
-app.use(require('cors')());
+// Launch Mongoose
+require('./modules/mongodb/connection')();
 
+// CORS when we are in dev
+if (process.env.NODE_ENV === 'development') app.use(require('cors')());
+
+// JSON Body-parser
 app.use(require('body-parser').json());
 
 // Logging HTTP request
@@ -27,3 +32,21 @@ app.listen(config.port, () => {
 process.on('unhandledRejection', (reason) => {
     logger.warn('Unhandled promise rejection', { reason });
 });
+
+// Crons
+const mongoStatsJob = new cron.CronJob({
+    cronTime: '00 00 00 * * *', // Run everyday at 00h00
+    onTick() {
+        console.log('Making mongodb stats');
+    }
+});
+
+const mongoBackupJob = new cron.CronJob({
+    cronTime: '00 00 03 * * *', // Run everyday at 03h00
+    onTick() {
+        console.log('Making mongodb backup');
+    }
+});
+
+mongoStatsJob.start();
+mongoBackupJob.start();

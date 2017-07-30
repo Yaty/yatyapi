@@ -6,7 +6,6 @@ Written by Hugo Da Roit <contact@hdaroit.fr>, 2017
 Based on Vue-admin from Fangdun Cai <cfddream@gmail.com>
 */
 
-module.exports = {
-    errorHandler: require('./error'),
-    auth: require('./auth')
-};
+const CustomError = require('./CustomError');
+
+module.exports = { CustomError };

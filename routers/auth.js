@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const mongodb = require('../modules/mongodb');
+const mongodb = require('../modules/mongodb').users;
 const logger = require('../modules/logger');
 const config = require('../config');
-const middlewares = require('../modules/middlewares');
-const JWTCheck = middlewares.jwtCheck;
-const JWTSign = middlewares.jwtSign;
+const authMiddlewares = require('../modules/middlewares').auth;
+const JWTCheck = authMiddlewares.checkJWT;
+const JWTSign = authMiddlewares.signJWT;
 
 router.post('/register', (req, res, next) => {
     mongodb.register(req.body.name, req.body.lastname, req.body.email, req.body.password)

@@ -1,16 +1,15 @@
-const config = require('../config');
-const logger = require('./logger');
-const mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
-const User = require('./mongo-models/user');
-const CustomError = require('./CustomError');
+/*
+Copyright (C) Hugo Da Roit <contact@hdaroit.fr> - All Rights Reserved
+Unauthorized copying of this file, via any medium is strictly prohibited
+Proprietary and confidential
+Written by Hugo Da Roit <contact@hdaroit.fr>, 2017
+Based on Vue-admin from Fangdun Cai <cfddream@gmail.com>
+*/
 
-mongoose.connect(config.mongodb, { useMongoClient: true }, (e) => {
-    if (e) {
-        throw new CustomError(CustomError.TYPES.MONGODB_ERRORS.CONNECTION_ERROR, "", e);
-    }
-    logger.info('Successfully connected to MongoDB.');
-});
+const config = require('../../config');
+const logger = require('../logger');
+const User = require('./mongo-models/user');
+const CustomError = require('../errors').CustomError;
 
 const getUserByEmail = (email) => {
     return new Promise((resolve, reject) => {
@@ -27,7 +26,7 @@ const login = (email, password) => {
         getUserByEmail(email)
             .then(user => {
                 user.comparePassword(password, (err, isMatch) => {
-                    if (err) return reject(new CustomError(CustomError.TYPES.JWT_ERRORS.COMPARE_PASSWORDS_ERROR, email, err));
+                    if (err) return reject(new CustomError(err, email));
                     return resolve({ isMatch, id: user.id, gyms: user.gyms });
                 });
             })
@@ -39,11 +38,11 @@ const login = (email, password) => {
 
 const register = (name, lastname, email, password) => {
     return new Promise((resolve, reject) => {
-       const newUser = new User({ name, lastname, email, password, lastLogin: new Date() });
-       newUser.save((e) => {
-           if (e) return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.SAVE_ERROR, "Registration", e));
-           return resolve();
-       });
+        const newUser = new User({ name, lastname, email, password, lastLogin: new Date() });
+        newUser.save((e) => {
+            if (e) return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.SAVE_ERROR, "Registration", e));
+            return resolve();
+        });
     });
 };
 
@@ -88,7 +87,7 @@ const setUserTokenId = (email, tokenId) => {
                 });
             })
             .catch(e => {
-               return reject(new CustomError(e, "Error while setting user token id : " + email + ' / ' + tokenId));
+                return reject(new CustomError(e, "Error while setting user token id : " + email + ' / ' + tokenId));
             });
     });
 };
@@ -98,13 +97,13 @@ const getUserInfoByEmail = (email) => {
         getUserByEmail(email)
             .then(user => {
                 return resolve({
-                   email: user.email,
-                   name: user.name,
-                   lastname: user.lastname,
-                   gyms: user.gyms,
-                   phone: user.phone,
-                   address: user.address,
-                   lastLogin: user.lastLogin
+                    email: user.email,
+                    name: user.name,
+                    lastname: user.lastname,
+                    gyms: user.gyms,
+                    phone: user.phone,
+                    address: user.address,
+                    lastLogin: user.lastLogin
                 });
             })
             .catch(e => {
@@ -125,17 +124,17 @@ const isUserExistById = (id) => {
 
 const removeTokenFromUserByEmail = (email) => {
     return new Promise((resolve, reject) => {
-       getUserByEmail(email)
-           .then(user => {
-               user.tokenId = null;
-               user.save((err) => {
+        getUserByEmail(email)
+            .then(user => {
+                user.tokenId = null;
+                user.save((err) => {
                     if (err) return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.SAVE_ERROR, "Updating : " + user, err));
                     return resolve();
-               });
-           })
-           .catch(e => {
-               return reject(new CustomError(e, "Error while removing token from user : " + email));
-           });
+                });
+            })
+            .catch(e => {
+                return reject(new CustomError(e, "Error while removing token from user : " + email));
+            });
     });
 };
 
