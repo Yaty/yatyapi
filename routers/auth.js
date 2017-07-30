@@ -38,7 +38,19 @@ router.post('/login', JWTSign, (req, res, next) => {
         });
 });
 
+router.post('/logout', JWTCheck, (req, res, next) => {
+    mongodb.removeTokenFromUserByEmail(res.locals.email)
+        .then(() => {
+            return res.sendStatus(200);
+        })
+        .catch((e) => {
+            logger.info('Error while logout', { email: res.locals.email, error: e });
+            return next(e);
+        });
+});
+
 router.get('/refresh', JWTCheck, (req, res, next) => {
+    // TODO : create a new token and return it
     return res.status(200).json({
         status: 'success'
     });
@@ -46,9 +58,16 @@ router.get('/refresh', JWTCheck, (req, res, next) => {
 
 router.get('/user', JWTCheck, (req, res, next) => {
     // TODO
-    return res.status(200).json({
-        status: 'success'
-    });
+    mongodb.getUserInfoByEmail(res.locals.email)
+        .then(user => {
+            return res.json({
+                data: user
+            });
+        })
+        .catch(e => {
+            logger.info('Error while getting user', { email: res.locals.email, error: e });
+            return next(e);
+        });
 });
 
 /*
