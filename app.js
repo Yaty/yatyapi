@@ -8,7 +8,7 @@ const app = express();
 require('./modules/mongodb/connection')();
 
 // CORS when we are in dev
-if (process.env.NODE_ENV === 'development') app.use(require('cors')());
+app.use(require('cors')());
 
 // JSON Body-parser
 app.use(require('body-parser').json());
