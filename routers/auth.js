@@ -23,11 +23,11 @@ router.post('/login', JWTSign, (req, res, next) => {
     mongodb.login(req.body.email, req.body.password)
         .then((user) => {
             if (user === null) {
-                logger.debug('Login unsuccessful', { email: req.body.email, pass: req.body.password });
+                logger.debug('Login unsuccessful', { email: req.body.email });
                 return res.sendStatus(401);
             } else if (user.isMatch) {
                 const token = res.locals.token; // set by the auth middleware
-                return res.json({ token, gyms: user.gyms });
+                return res.json({ token });
             } else {
                 throw "Unknown error while login.";
             }
