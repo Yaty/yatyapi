@@ -1,12 +1,12 @@
 {
-  "name": "yaty api",
+  "name": "yaty-api",
   "version": "1.0.0",
   "description": "Climbing facilities management application API",
   "author": "Hugo Da Roit <contact@hdaroit.fr>",
   "private": true,
   "scripts": {
-    "dev": "NODE_ENV=development node ./app",
-    "prod": "NODE_ENV=production node ./app"
+    "dev": "set NODE_ENV=development&& node app",
+    "prod": "set NODE_ENV=production&& node app"
   },
   "dependencies": {
     "body-parser": "^1.17.2",
