@@ -12,10 +12,14 @@ const mongoose = require('mongoose');
 const CustomError = require('../errors').CustomError;
 mongoose.Promise = global.Promise;
 
-const connect = function() {
-    mongoose.connect(config.mongodb, { useMongoClient: true }, (e) => {
-        if (e) throw new CustomError(CustomError.TYPES.MONGODB_ERRORS.CONNECTION_ERROR, "", e);
-        logger.info('Successfully connected to MongoDB.');
+const connect = () => {
+    return new Promise((resolve, reject) => {
+        mongoose.connect(config.mongodb, { useMongoClient: true }, (e) => {
+            if (e) return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.CONNECTION_ERROR, "", e));
+            require('./mongo-models'); // Init all models
+            logger.info('Successfully connected to MongoDB.');
+            return resolve();
+        });
     });
 };
 
