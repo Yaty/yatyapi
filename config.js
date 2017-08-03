@@ -1,3 +1,11 @@
+/*
+Copyright (C) Hugo Da Roit <contact@hdaroit.fr> - All Rights Reserved
+Unauthorized copying of this file, via any medium is strictly prohibited
+Proprietary and confidential
+Written by Hugo Da Roit <contact@hdaroit.fr>, 2017
+Based on Vue-admin from Fangdun Cai <cfddream@gmail.com>
+*/
+
 const errors = {
     JWT_ERRORS: {
         BAD_AUTHORIZATION_TYPE: { name: "BAD_AUTHORIZATION_TYPE", msg: "Occur when the Authorization type is not Bearer.", code: 400 },
@@ -9,7 +17,8 @@ const errors = {
         SIGN_ERROR: { name: "SIGN_ERROR", msg: "Occur when jwt.sign fail.", code: 500 }
     },
     AUTH_ERRORS: {
-        BAD_PASSWORD: { name: "BAD_PASSWORD", msg: "Occur when a password is wrong.", code: 401 }
+        BAD_PASSWORD: { name: "BAD_PASSWORD", msg: "Occur when a password is wrong.", code: 401 },
+        BAD_USER: { name: "BAD_USER", msg: "Occur when a user does not exists.", code: 401 }
     },
     MONGODB_ERRORS: {
         CONNECTION_ERROR: { name: "CONNECTION_ERROR", msg: "Occur when a MongoDB connection fail.", code: 500},
@@ -17,6 +26,8 @@ const errors = {
         UNKNOWN_USER: { name: "UNKNOWN_USER", msg: "Occur when a user is unknown.", code: 401},
         SAVE_ERROR: { name: "SAVE_ERROR", msg: "Occur when a save fail.", code: 500},
         VALIDATION_ERROR: { name: "VALIDATION_ERROR", msg: "Occur when a field is incorrect.", code: 400},
+        GET_GYMS_ERROR: { name: "GET_GYMS_ERROR", msg: "Occur when a gym fetch fail.", code: 500}
+
     },
     BCRYPT_ERRORS: {
         GEN_SALT_ERROR: { name: "GEN_SALT_ERROR", msg: "Occur when bcrypt.genSalt fail.", code: 500 },
