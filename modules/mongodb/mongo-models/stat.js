@@ -10,7 +10,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 mongoose.Promise = global.Promise;
 
-const StatsSchema = new Schema({
+const StatSchema = new Schema({
 });
 
-module.exports = mongoose.model('Stats', StatsSchema);
+module.exports = mongoose.model('Stat', StatSchema);
