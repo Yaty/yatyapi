@@ -10,11 +10,11 @@ const logger = require('../logger');
 const CustomError = require('../errors').CustomError;
 
 const errorHandler = (err, req, res, next) => {
-    logger.error('Express error catcher', { err });
-    if (res.headersSent) {
-        return next(new CustomError(err, "Express error handler"));
-    }
-    return res.sendStatus(new CustomError(err).type.code);
+    logger.info('Express error catcher', { err });
+    const error = new CustomError(err, "Express error handler");
+    (error.type.code === 500 ? logger.error : logger.warn)('Express error catcher', { error });
+    if (res.headersSent) return next(error);
+    return res.sendStatus(error.type.code);
 };
 
 module.exports = errorHandler;
