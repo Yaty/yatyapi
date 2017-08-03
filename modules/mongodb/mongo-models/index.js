@@ -6,9 +6,8 @@ Written by Hugo Da Roit <contact@hdaroit.fr>, 2017
 Based on Vue-admin from Fangdun Cai <cfddream@gmail.com>
 */
 
-const users = require('./users');
-const stats = require('./stats');
-const gyms = require('./gyms');
-const migration = require('./migration');
-
-module.exports = { users, stats, gyms, migration };
+module.exports = {
+    gym: require('./gym'),
+    user: require('./user'),
+    stat: require('./stat')
+};
