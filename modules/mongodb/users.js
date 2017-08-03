@@ -8,7 +8,7 @@ Based on Vue-admin from Fangdun Cai <cfddream@gmail.com>
 
 const config = require('../../config');
 const logger = require('../logger');
-const User = require('./mongo-models/user');
+const User = require('./mongo-models').user;
 const CustomError = require('../errors').CustomError;
 
 const getUserByEmail = (email) => {
