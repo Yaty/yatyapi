@@ -21,18 +21,23 @@ const errors = {
         BAD_USER: { name: "BAD_USER", msg: "Occur when a user does not exists.", code: 401 }
     },
     MONGODB_ERRORS: {
-        CONNECTION_ERROR: { name: "CONNECTION_ERROR", msg: "Occur when a MongoDB connection fail.", code: 500},
-        SEARCH_USER_ERROR: { name: "SEARCH_USER_ERROR", msg: "Occur when a user search fail.", code: 500},
-        UNKNOWN_USER: { name: "UNKNOWN_USER", msg: "Occur when a user is unknown.", code: 401},
-        SAVE_ERROR: { name: "SAVE_ERROR", msg: "Occur when a save fail.", code: 500},
-        VALIDATION_ERROR: { name: "VALIDATION_ERROR", msg: "Occur when a field is incorrect.", code: 400},
-        GET_GYMS_ERROR: { name: "GET_GYMS_ERROR", msg: "Occur when a gym fetch fail.", code: 500}
-
+        CONNECTION_ERROR: { name: "CONNECTION_ERROR", msg: "Occur when a MongoDB connection fail.", code: 500 },
+        SEARCH_USER_ERROR: { name: "SEARCH_USER_ERROR", msg: "Occur when a user search fail.", code: 500 },
+        UNKNOWN_USER: { name: "UNKNOWN_USER", msg: "Occur when a user is unknown.", code: 401 },
+        SAVE_ERROR: { name: "SAVE_ERROR", msg: "Occur when a save fail.", code: 500 },
+        VALIDATION_ERROR: { name: "VALIDATION_ERROR", msg: "Occur when a field is incorrect.", code: 400 },
+        GET_GYMS_ERROR: { name: "GET_GYMS_ERROR", msg: "Occur when a gym fetch fail.", code: 500 }
     },
     BCRYPT_ERRORS: {
         GEN_SALT_ERROR: { name: "GEN_SALT_ERROR", msg: "Occur when bcrypt.genSalt fail.", code: 500 },
         HASH_ERROR: { name: "HASH_ERROR", msg: "Occur when bcrypt.hash fail.", code: 500 },
         COMPARE_PASSWORDS_ERROR: { name: "COMPARE_PASSWORDS_ERROR", msg: "Occur when comparing the stored password and the proposed one with bcrypt.", code: 500 },
+    },
+    CACHE_ERRORS: {
+        GET_ERROR: { name: "GET_ERROR", msg: "Occur when a get fail.", code: 500 },
+        SET_UNKNOWN_ERROR: { name: "SET_UNKNOWN_ERROR", msg: "Occur when a set cache is not a success and is not an error.", code: 500 },
+        SET_ERROR: { name: "SET_ERROR", msg: "Occur when a set cache fail.", code: 500 },
+        SET_ERROR2: { name: "SET_ERROR", msg: "Occur when a set cache fail and succeed.", code: 500 }
     },
     OTHERS: {
         ERROR: { name: "ERROR", msg: "Occur when a dependency throw his own error.", code: 500 }
