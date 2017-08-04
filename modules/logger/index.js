@@ -11,7 +11,7 @@ const winston = require('winston');
 const timestamp = () => { return Date.now() };
 const formatter = (options) => {
     return `${options.timestamp()} ${options.level.toUpperCase()} ${options.message ? options.message : ''}
-            ${options.meta && Object.keys(options.meta).length ? `\\n\\t ${JSON.stringify(options.meta)}` : ''}`;
+            ${options.meta && Object.keys(options.meta).length ? `${JSON.stringify(options.meta)}` : ''}`;
 };
 
 const logger = new (winston.Logger)({
