@@ -13,7 +13,7 @@ mongoose.Promise = global.Promise;
 
 const GymSchema = new Schema({
     name: { type: String, required: true },
-    rank: { type: String, required: true, enum: ['climber', 'routesetter', 'owner'], default: 'climber' },
+    role: { type: String, required: true, enum: ['climber', 'routesetter', 'owner'], default: 'climber' },
 });
 
 module.exports = mongoose.model('Gym', GymSchema);
