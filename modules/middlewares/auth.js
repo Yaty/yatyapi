@@ -41,7 +41,7 @@ const checkJWT = (req, res, next) => {
                 }
 
                 // MongoDB check : useless ?
-                mongodb.isUserExistById(decodedToken.userId)
+                mongodb.isUserExistByEmail(decodedToken.email)
                     .then((user) => {
                         if (user.tokenId !== decodedToken.jti) return Promise.reject(new CustomError(CustomError.TYPES.JWT_ERRORS.BAD_JWT, "Bad token id", e));
                         logger.debug("Access granted to " + decodedToken.email + " for " + req.originalUrl);

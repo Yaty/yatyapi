@@ -112,9 +112,9 @@ const getUserInfoByEmail = (email) => {
     });
 };
 
-const isUserExistById = (id) => {
+const isUserExistByEmail = (email) => {
     return new Promise((resolve, reject) => {
-        User.findOne({ id }, (err, user) => {
+        User.findOne({ email }, (err, user) => {
             if (err) return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.UNKNOWN_USER, id));
             if (user === null || typeof user === 'undefined') return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.UNKNOWN_USER, id));
             return resolve(user);
@@ -141,7 +141,7 @@ const removeTokenFromUserByEmail = (email) => {
 module.exports = {
     login,
     register,
-    isUserExistById,
+    isUserExistByEmail,
     setUserTokenId,
     getUserInfoByEmail,
     removeTokenFromUserByEmail
