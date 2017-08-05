@@ -18,7 +18,7 @@ const getGyms = () => {
             if (err) return reject(new CustomError(CustomError.TYPES.CACHE_ERRORS.GET_ERROR, "getGyms", err));
             if (gyms1) return resolve(gyms1);
             else {
-                User.find({}, 'gyms',).distinct('name', (err, gyms2) => {
+                User.find({}, 'gyms').distinct('name', (err, gyms2) => {
                     if (err) return reject(new CustomError(CustomError.TYPES.MONGODB_ERRORS.GET_GYMS_ERROR, '', err));
                     else {
                         cache.set('gyms', gyms2, (err, success) => {
