@@ -7,12 +7,12 @@ Based on Vue-admin from Fangdun Cai <cfddream@gmail.com>
 */
 
 const router = require('express').Router();
-const mongodb = require('../modules/mongodb').gyms;
+const db = require('../modules/db').gyms;
 const JWTCheck = require('../modules/middlewares').auth.checkJWT;
 const CustomError = require('../modules/errors').CustomError;
 
 router.get('/', JWTCheck, (req, res, next) => {
-    mongodb.getGyms()
+    db.getGyms()
         .then((gyms) => {
             return res.json({ gyms });
         })

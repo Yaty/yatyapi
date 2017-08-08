@@ -9,8 +9,6 @@ Based on Vue-admin from Fangdun Cai <cfddream@gmail.com>
 const jwt = require('jsonwebtoken');
 const config = require('../../config');
 const logger = require('../logger');
-const mongodb = require('../mongodb').users;
-const uuidv4 = require('uuid/v4');
 const CustomError = require('../errors/').CustomError;
 
 const checkJWT = (req, res, next) => {
@@ -27,7 +25,7 @@ const checkJWT = (req, res, next) => {
 
     try {
         const token = getTokenFromHeaders(req.headers);
-
+        // TODO : Use RSA encryption
         jwt.verify(token, config.token.secret,
             {
                 audience: config.token.options.audience,
@@ -37,20 +35,12 @@ const checkJWT = (req, res, next) => {
                 if (e) {
                     if (e.name === 'TokenExpiredError') throw new CustomError(CustomError.TYPES.JWT_ERRORS.TOKEN_EXPIRED, decodedToken, e);
                     else if (e.name === 'JsonWebTokenError') throw new CustomError(CustomError.TYPES.JWT_ERRORS.BAD_JWT, decodedToken, e);
-                    throw new CustomError(CustomError.TYPES.JWT_ERRORS.VERIFICATION_ERROR, token, e);
+                    return next(new CustomError(CustomError.TYPES.JWT_ERRORS.VERIFICATION_ERROR, token, e));
                 }
 
-                // MongoDB check : useless ?
-                mongodb.isUserExistByEmail(decodedToken.email)
-                    .then((user) => {
-                        if (user.tokenId !== decodedToken.jti) return Promise.reject(new CustomError(CustomError.TYPES.JWT_ERRORS.BAD_JWT, "Bad token id", e));
-                        logger.debug("Access granted to " + decodedToken.email + " for " + req.originalUrl);
-                        res.locals.email = decodedToken.email;
-                        return next();
-                    })
-                    .catch(e => {
-                        throw new CustomError(e, "checkJWT, isUserExistById");
-                    });
+                logger.debug("Access granted to " + decodedToken.email + " for " + req.originalUrl);
+                res.locals.email = decodedToken.email;
+                return next();
             });
     } catch (e) {
         logger.error("Error when checking JWT", { error: e });
@@ -59,26 +49,18 @@ const checkJWT = (req, res, next) => {
 };
 
 const signJWT = (req, res, next) => {
-    const jwtId = uuidv4();
     jwt.sign(
         { email: req.body.email },
         config.token.secret,
         {
             expiresIn: config.token.options.expiresIn,
             audience: config.token.options.audience,
-            issuer: config.token.options.issuer,
-            jwtid: jwtId
+            issuer: config.token.options.issuer
         },
         (e, token) => {
             if (e) return next(new CustomError(CustomError.TYPES.JWT_ERRORS.SIGN_ERROR, token, e));
-            mongodb.setUserTokenId(req.body.email, jwtId)
-                .then(() => {
-                    res.locals.token = token;
-                    return next();
-                })
-                .catch((e) => {
-                    return next(new CustomError(e, "signJwt, setUserTokenId"));
-                });
+            res.locals.token = token;
+            return next();
         }
     );
 };

@@ -17,11 +17,11 @@ const errors = {
         SIGN_ERROR: { name: "SIGN_ERROR", msg: "Occur when jwt.sign fail.", code: 500 }
     },
     AUTH_ERRORS: {
-        BAD_PASSWORD: { name: "BAD_PASSWORD", msg: "Occur when a password is wrong.", code: 401 },
-        BAD_USER: { name: "BAD_USER", msg: "Occur when a user does not exists.", code: 401 }
+        BAD_PASSWORD: {name: "BAD_PASSWORD", msg: "Occur when a password is wrong.", code: 401},
     },
-    MONGODB_ERRORS: {
-        CONNECTION_ERROR: { name: "CONNECTION_ERROR", msg: "Occur when a MongoDB connection fail.", code: 500 },
+    MYSQL_ERRORS: {
+        GET_CONNECTION_ERROR: { name: "GET_CONNECTION_ERROR", msg:"Occur when a pool can't retrieve a connection.", code: 500 },
+        QUERY_ERROR: { name: "QUERY_ERROR", msg: "Occur when a query fail.", code: 500 },
         SEARCH_USER_ERROR: { name: "SEARCH_USER_ERROR", msg: "Occur when a user search fail.", code: 500 },
         UNKNOWN_USER: { name: "UNKNOWN_USER", msg: "Occur when a user is unknown.", code: 401 },
         SAVE_ERROR: { name: "SAVE_ERROR", msg: "Occur when a save fail.", code: 500 },
@@ -40,14 +40,21 @@ const errors = {
         SET_ERROR2: { name: "SET_ERROR", msg: "Occur when a set cache fail and succeed.", code: 500 }
     },
     OTHERS: {
-        ERROR: { name: "ERROR", msg: "Occur when a dependency throw his own error.", code: 500 }
+        ERROR: { name: "ERROR", msg: "Occur when a dependency throw his own error.", code: 500 },
+        APPLY_ERROR: { name: "APPLY_ERROR", msg: "Occur when the applied function has throw an error.", code: 500 }
     }
 };
 
 const prodConfig = {
     port: 8081,
     staticPath: __dirname + '/static',
-    mongodb: 'mongodb://localhost:27017/yaty',
+    pool: {
+        connectionLimit: 10,
+        host: '',
+        user: '',
+        password: '',
+        database: ''
+    },
     token: {
         secret: '', // we should use a rsa certificate
         options: {
@@ -63,7 +70,13 @@ const prodConfig = {
 const devConfig = {
     port: 8081,
     staticPath: __dirname + '/static',
-    mongodb: 'mongodb://localhost:27017/yaty',
+    pool: {
+        connectionLimit: 10,
+        host: '127.0.0.1',
+        user: 'root',
+        password: 'droopy1',
+        database: 'mydb'
+    },
     token: {
         secret: 'a]4@SjZed*FU>L-9563e',
         options: {
