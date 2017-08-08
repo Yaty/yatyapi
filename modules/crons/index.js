@@ -10,13 +10,13 @@ const cron = require('cron');
 const mongoStatsJob = new cron.CronJob({
     cronTime: '00 00 00 * * *', // Run everyday at 00h00
     onTick() {
-        console.log('Making mongodb stats');
+        console.log('Making db stats');
     }
 });
 const mongoBackupJob = new cron.CronJob({
     cronTime: '00 00 03 * * *', // Run everyday at 03h00
     onTick() {
-        console.log('Making mongodb backup');
+        console.log('Making db backup');
     }
 });
 
