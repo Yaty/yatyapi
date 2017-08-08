@@ -10,9 +10,8 @@ const logger = require('../logger');
 const CustomError = require('../errors').CustomError;
 
 const errorHandler = (err, req, res, next) => {
-    logger.info('Express error catcher', { err });
-    const error = new CustomError(err, "Express error handler");
-    (error.type.code === 500 ? logger.error : logger.warn)('Express error catcher', { error });
+    const error = new CustomError(err);
+    (error.type.code >= 500 && error.type.code <= 599 ? logger.error : logger.info)('Express error catcher', { error });
     if (res.headersSent) return next(error);
     return res.sendStatus(error.type.code);
 };
