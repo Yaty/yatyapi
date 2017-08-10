@@ -25,9 +25,12 @@ const getUser = (email) => {
     });
 };
 
+/**
+ * Find user gyms and return the gym ID, name and the user role in this gym
+ */
 const getUserGyms = (email) => {
     return new Promise((resolve, reject) => {
-        db.query('SELECT * FROM gyms_users WHERE user_email=?', [email])
+        db.query('SELECT gyms.id, gyms.name, gyms_users.role FROM gyms_users JOIN gyms ON (gyms_users.gym_id = gyms.id) WHERE user_email = ?', [email])
             .then(gyms => resolve(gyms))
             .catch(e => reject(new CustomError(e, "getUserGyms", e)));
     });
@@ -43,9 +46,16 @@ const comparePassword = (candidatePassword, password) => {
 
 const login = (email, password) => {
     return new Promise((resolve, reject) => {
+        const setLastLogin = () => new Promise((resolve, reject) =>
+            db.query('UPDATE users SET lastLogin=? WHERE email=?', [new Date().toISOString(), email])
+                .then(resolve)
+                .catch(e => reject(new CustomError(e, "login setLastLogin")))
+        );
+
         getUser(email)
             .then(user => comparePassword(password, user.password))
             .then(isMatch => isMatch ? resolve() : reject(new CustomError(CustomError.TYPES.AUTH_ERRORS.BAD_PASSWORD, "login")))
+            .then(setLastLogin)
             .catch(e => reject(new CustomError(e, "login")));
     });
 };
@@ -107,7 +117,6 @@ const getUserInfo = (email) => {
                 userInfo.email = user.email;
                 userInfo.name = user.name;
                 userInfo.lastname = user.lastname;
-                userInfo.lastLogin = user.lastLogin;
                 return getUserGyms(email);
             })
             .then(gyms => {
