@@ -14,10 +14,10 @@ const errors = {
         TOKEN_EXPIRED: { name: "TOKEN_EXPIRED", msg: "Occur when the token is expired.", code: 419 },
         BAD_JWT: { name: "BAD_JWT", msg: "Occur when the JWT verification detect a bad JWT.", code: 401 },
         VERIFICATION_ERROR : { name: "VERIFICATION_ERROR", msg: "Occur when jwt.verify fail.", code: 500 },
-        SIGN_ERROR: { name: "SIGN_ERROR", msg: "Occur when jwt.sign fail.", code: 500 }
+        SIGN_ERROR: { name: "SIGN_ERROR", msg: "Occur when jwt.sign fail.", code: 500 },
     },
     AUTH_ERRORS: {
-        BAD_PASSWORD: {name: "BAD_PASSWORD", msg: "Occur when a password is wrong.", code: 401},
+        BAD_PASSWORD: { name: "BAD_PASSWORD", msg: "Occur when a password is wrong.", code: 401},
     },
     MYSQL_ERRORS: {
         GET_CONNECTION_ERROR: { name: "GET_CONNECTION_ERROR", msg:"Occur when a pool can't retrieve a connection.", code: 500 },
@@ -26,7 +26,7 @@ const errors = {
         UNKNOWN_USER: { name: "UNKNOWN_USER", msg: "Occur when a user is unknown.", code: 401 },
         SAVE_ERROR: { name: "SAVE_ERROR", msg: "Occur when a save fail.", code: 500 },
         VALIDATION_ERROR: { name: "VALIDATION_ERROR", msg: "Occur when a field is incorrect.", code: 400 },
-        GET_GYMS_ERROR: { name: "GET_GYMS_ERROR", msg: "Occur when a gym fetch fail.", code: 500 }
+        GET_GYMS_ERROR: { name: "GET_GYMS_ERROR", msg: "Occur when a gym fetch fail.", code: 500 },
     },
     BCRYPT_ERRORS: {
         GEN_SALT_ERROR: { name: "GEN_SALT_ERROR", msg: "Occur when bcrypt.genSalt fail.", code: 500 },
@@ -37,11 +37,11 @@ const errors = {
         GET_ERROR: { name: "GET_ERROR", msg: "Occur when a get fail.", code: 500 },
         SET_UNKNOWN_ERROR: { name: "SET_UNKNOWN_ERROR", msg: "Occur when a set cache is not a success and is not an error.", code: 500 },
         SET_ERROR: { name: "SET_ERROR", msg: "Occur when a set cache fail.", code: 500 },
-        SET_ERROR2: { name: "SET_ERROR", msg: "Occur when a set cache fail and succeed.", code: 500 }
+        SET_ERROR2: { name: "SET_ERROR", msg: "Occur when a set cache fail and succeed.", code: 500 },
     },
     OTHERS: {
         ERROR: { name: "ERROR", msg: "Occur when a dependency throw his own error.", code: 500 },
-        APPLY_ERROR: { name: "APPLY_ERROR", msg: "Occur when the applied function has throw an error.", code: 500 }
+        APPLY_ERROR: { name: "APPLY_ERROR", msg: "Occur when the applied function has throw an error.", code: 500 },
     }
 };
 
