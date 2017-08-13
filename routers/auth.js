@@ -21,7 +21,12 @@ router.post('/register', (req, res, next) => {
 
 router.post('/login', JWTSign, (req, res, next) => {
     db.login(req.body.email, req.body.password)
-        .then(() => res.json({ token: res.locals.token }))
+        .then(() => {
+            res.set({
+                'Access-Control-Expose-Headers': 'Authorization',
+                'Authorization': 'Bearer ' + res.locals.token
+            }).json();
+        })
         .catch(e => next(new CustomError(e, "POST /login failure : " + req.body.email)));
 });
 
