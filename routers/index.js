@@ -7,6 +7,7 @@ Based on Vue-admin from Fangdun Cai <cfddream@gmail.com>
 */
 
 module.exports = {
-  auth: require('./auth'),
-  gyms: require('./gyms')
+    auth: require('./auth'),
+    gyms: require('./gyms'),
+    users: require('./users')
 };

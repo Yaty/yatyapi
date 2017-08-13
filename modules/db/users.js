@@ -64,7 +64,7 @@ const register = (name, lastname, email, password) => {
     return new Promise((resolve, reject) => {
         bcrypt.hash(password, SALT_WORK_FACTOR)
             .then(hash => db.query('INSERT INTO users (email, name, lastname, password) VALUES (?, ?, ?, ?)', [email, name, lastname, hash]))
-            .then(res => resolve())
+            .then(resolve)
             .catch(e => reject(new CustomError(e, "register", e)));
     });
 };
@@ -127,9 +127,19 @@ const getUserInfo = (email) => {
     });
 };
 
+const addGymToUser = (gym, email) => {
+    return new Promise((resolve, reject) => {
+       db.query('INSERT INTO gyms_users (gym_id, user_email) VALUES (?, ?)', [gym, email])
+           .then(resolve)
+           .catch(e => reject(new CustomError(e, "addGymToUser : " + gym + " " + email)));
+    });
+};
+
 module.exports = {
     login,
     register,
     setUserTokenId,
-    getUserInfo
+    getUserInfo,
+    addGymToUser,
+    getUserGyms
 };

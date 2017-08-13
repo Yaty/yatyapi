@@ -26,6 +26,7 @@ app.use(require('morgan')("combined", { stream: { write: message => logger.info(
 app.use('/static', express.static(config.staticPath));
 app.use('/auth', routers.auth);
 app.use('/gyms', routers.gyms);
+app.use('/users', routers.users);
 
 // Error handler
 app.use(require('./modules/middlewares').errorHandler);
