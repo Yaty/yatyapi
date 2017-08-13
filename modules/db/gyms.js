@@ -10,13 +10,14 @@ const CustomError = require('../errors').CustomError;
 const NodeCache = require( "node-cache" );
 const cache = new NodeCache();
 const db = require('./queriesHandler');
+const logger = require('../logger')
 
 const getGyms = () => {
     return new Promise((resolve ,reject) => {
         // TODO : caching with NodeCache, reset cache when new entry or deletion !!!
         db.query('SELECT * FROM gyms')
             .then(res => resolve(res))
-            .catch(e => new CustomError(e, "getGyms"));
+            .catch(e => reject(new CustomError(e, "getGyms")));
         /*
         cache.get('gyms', (err, gyms1) => {
             if (err) return reject(new CustomError(CustomError.TYPES.CACHE_ERRORS.GET_ERROR, "getGyms", err));
@@ -40,6 +41,34 @@ const getGyms = () => {
     });
 };
 
+const checkGymOwner = (gym, user) => {
+    return new Promise((resolve, reject) => {
+       db.query('SELECT COUNT(*) AS counter FROM gyms_users WHERE gym_id=? AND user_email=?', [gym, user])
+           .then(res => {
+               const counter = Number(res[0].counter);
+               if (counter === 1) {
+                   return resolve();
+               } else if (counter > 1) {
+                   logger.warn('A user got multiples times a gym', { user, gym});
+                   return resolve();
+               } else {
+                   return reject(new CustomError(CustomError.TYPES.OTHERS.BAD_GYM_OWNER, "checkGymOwner"));
+               }
+           })
+           .catch(e => reject(new CustomError(e, "checkGymOwner")));
+    });
+};
+
+const getGymMembers = (gym) => {
+    return new Promise((resolve, reject) => {
+       db.query('SELECT users.email, users.name, users.lastname, users.lastLogin FROM users JOIN gyms_users ON ( users.email = gyms_users.user_email ) WHERE gyms_users.gym_id = ?', [gym])
+           .then(res => resolve(res))
+           .catch(e => reject(new CustomError(e, "getGymMembers")));
+    });
+};
+
 module.exports = {
-    getGyms
+    getGyms,
+    checkGymOwner,
+    getGymMembers
 };

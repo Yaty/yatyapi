@@ -21,4 +21,15 @@ router.get('/', JWTCheck, (req, res, next) => {
         });
 });
 
+router.get('/members', JWTCheck, (req, res, next) => {
+    // Check if he owns the gym then return users
+    const owner = req.query.email;
+    const gym = req.query.gym;
+
+    db.checkGymOwner(gym, owner)
+        .then(() => db.getGymMembers(gym))
+        .then(members => res.json({ members }))
+        .catch(e => next(new CustomError(e, "GET /gyms/users fail")));
+});
+
 module.exports = router;

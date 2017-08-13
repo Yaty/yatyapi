@@ -26,7 +26,7 @@ const errors = {
         UNKNOWN_USER: { name: "UNKNOWN_USER", msg: "Occur when a user is unknown.", code: 401 },
         SAVE_ERROR: { name: "SAVE_ERROR", msg: "Occur when a save fail.", code: 500 },
         VALIDATION_ERROR: { name: "VALIDATION_ERROR", msg: "Occur when a field is incorrect.", code: 400 },
-        GET_GYMS_ERROR: { name: "GET_GYMS_ERROR", msg: "Occur when a gym fetch fail.", code: 500 },
+        GET_GYMS_ERROR: { name: "GET_GYMS_ERROR", msg: "Occur when a gym fetch fail.", code: 500 }
     },
     BCRYPT_ERRORS: {
         GEN_SALT_ERROR: { name: "GEN_SALT_ERROR", msg: "Occur when bcrypt.genSalt fail.", code: 500 },
@@ -42,6 +42,7 @@ const errors = {
     OTHERS: {
         ERROR: { name: "ERROR", msg: "Occur when a dependency throw his own error.", code: 500 },
         APPLY_ERROR: { name: "APPLY_ERROR", msg: "Occur when the applied function has throw an error.", code: 500 },
+        BAD_GYM_OWNER: { name: "BAD_GYM_OWNER", msg: "Occur when someone pretend to own a gym and doesn't.", code: 403 }
     }
 };
 
