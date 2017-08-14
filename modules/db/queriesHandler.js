@@ -13,7 +13,7 @@ const getConnection = () => {
     return new Promise((resolve, reject) => {
         pool.getConnection((err, connection) => {
             if (err && connection) connection.release();
-            if (err) return reject(new CustomError(CustomError.TYPES.MYSQL_ERRORS.GET_CONNECTION_ERROR, "queriesHandler getConnection", err));
+            if (err) return reject(new CustomError(CustomError.TYPES.MYSQL_ERRORS.GET_CONNECTION_ERROR, "getConnection", err));
             return resolve(connection);
         });
     });
@@ -24,7 +24,7 @@ const query = (query, params) => {
         getConnection()
             .then(connection => {
                 connection.query(query, params, (err, res, fields) => {
-                    if (err) return reject(new CustomError(CustomError.TYPES.MYSQL_ERRORS.QUERY_ERROR, "getConnection", err));
+                    if (err) return reject(new CustomError(CustomError.TYPES.MYSQL_ERRORS.QUERY_ERROR, "query", err));
                     connection.release();
                     return resolve(res);
                 });
