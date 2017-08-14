@@ -50,7 +50,7 @@ const prodConfig = {
     port: 8081,
     staticPath: __dirname + '/static',
     pool: {
-        connectionLimit: 10,
+        connectionLimit: 100,
         host: '',
         user: '',
         password: '',
@@ -72,7 +72,7 @@ const devConfig = {
     port: 8081,
     staticPath: __dirname + '/static',
     pool: {
-        connectionLimit: 10,
+        connectionLimit: 100,
         host: '127.0.0.1',
         user: 'root',
         password: 'droopy1',
