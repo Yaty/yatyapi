@@ -17,7 +17,6 @@ const getUser = (email) => {
     return new Promise((resolve, reject) => {
         db.query('SELECT * FROM users WHERE email=?', [email])
             .then(res => {
-                if (res.length === 0) return reject(new CustomError(CustomError.TYPES.MYSQL_ERRORS.UNKNOWN_USER, email));
                 if (res.length === 1) return resolve(res[0]);
                 return reject(new CustomError(CustomError.TYPES.MYSQL_ERRORS.UNKNOWN_USER));
             })
@@ -101,14 +100,6 @@ const update = (connection, name, lastname, email, oldPassword, newPassword, pho
 };
 */
 
-const setUserTokenId = (email, tokenId) => {
-    return new Promise((resolve, reject) => {
-        db.query('UPDATE users SET tokenId=? WHERE email=?', [tokenId, email])
-            .then(res => resolve())
-            .catch(e => reject(new CustomError(e, "setUserTokenId : " + email + ' / ' + tokenId)));
-    });
-};
-
 const getUserInfo = (email) => {
     return new Promise((resolve, reject) => {
         const userInfo = {};
@@ -138,7 +129,6 @@ const addGymToUser = (gym, email) => {
 module.exports = {
     login,
     register,
-    setUserTokenId,
     getUserInfo,
     addGymToUser,
     getUserGyms
