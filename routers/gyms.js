@@ -23,13 +23,24 @@ router.get('/', JWTCheck, (req, res, next) => {
 
 router.get('/members', JWTCheck, (req, res, next) => {
     // Check if he owns the gym then return users
-    const owner = req.query.email;
+    const owner = res.locals.email;
     const gym = req.query.gym;
 
     db.checkGymOwner(gym, owner)
         .then(() => db.getGymMembers(gym))
         .then(members => res.json({ members }))
-        .catch(e => next(new CustomError(e, "GET /gyms/users fail")));
+        .catch(e => next(new CustomError(e, "GET /gyms/members fail")));
+});
+
+router.post('/members/add', JWTCheck, (req, res, next) => {
+    const members = req.body.members;
+    const gym = req.body.gym;
+    const owner = res.locals.email;
+
+    db.checkGymOwner(gym, owner)
+        .then(() => db.addMembers(gym, members))
+        .then((membersStatus) => res.json({ members: membersStatus }))
+        .catch(e => next(new CustomError(e, "POST /gyms/members/add fail")))
 });
 
 module.exports = router;

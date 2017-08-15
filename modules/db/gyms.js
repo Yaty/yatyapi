@@ -67,8 +67,63 @@ const getGymMembers = (gym) => {
     });
 };
 
+// TODO : Send a mail to member.email with a validation code to able him to access his account
+const addMembers = (gym, members) => {
+    return new Promise((resolve, reject) => {
+        const insertInUsersColumns = ['email', 'name', 'lastname'];
+        const insertInUsers = {
+            query: 'INSERT INTO users (' + insertInUsersColumns.toString() +  ') VALUES ',
+            params: []
+        };
+
+        const insertInGymsUsersColumns = ['gym_id', 'user_email'];
+        const insertInGymsUsers = {
+            query: 'INSERT INTO gyms_users (' + insertInGymsUsersColumns.toString() + ') VALUES ',
+            params: []
+        };
+
+        for (let i = 0; i < members.length; i++) {
+            let member = members[i];
+            if (member.hasOwnProperty('email') && member.hasOwnProperty('name') && member.hasOwnProperty('lastname') && gym) {
+                insertInUsers.query += i === members.length - 1 ? '(?, ?, ?)' : '(?, ?, ?), ';
+                insertInUsers.params.push(member.email, member.name, member.lastname);
+
+                insertInGymsUsers.query += i === members.length - 1 ? '(?, ?)' : '(?, ?), ';
+                insertInGymsUsers.params.push(gym, member.email);
+            } else {
+                logger.info('A user will not be added (addMembers) :', { member, gym });
+                member.created = false
+            }
+        }
+
+        if (insertInUsers.params.length > 0 && insertInGymsUsers.params.length > 0) {
+            db.queries([insertInUsers, insertInGymsUsers])
+                .then(res => {
+                    if (Number(res[0].affectedRows) === insertInUsers.params.length/insertInUsersColumns.length && Number(res[1].affectedRows) === insertInGymsUsers.params.length/insertInGymsUsersColumns.length) {
+                        // All members are created
+                        members.forEach(member => {
+                            if (!member.created) {
+                                member.created = true
+                            }
+                        });
+                    } else {
+                        // Some members aren't created, we can't know which so we set that to null
+                        members.forEach(member => {
+                            if (member.created !== false) {
+                                member.created = null
+                            }
+                        });
+                    }
+                    return resolve(members);
+                })
+                .catch(e => reject(new CustomError(e, "addMembers")));
+        } else return reject(new CustomError(CustomError.TYPES.OTHERS.INVALID_USERS, "addMembers"));
+    });
+};
+
 module.exports = {
     getGyms,
     checkGymOwner,
-    getGymMembers
+    getGymMembers,
+    addMembers
 };
