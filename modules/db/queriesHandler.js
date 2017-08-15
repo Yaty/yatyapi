@@ -33,4 +33,17 @@ const query = (query, params) => {
     });
 };
 
-module.exports = { query };
+const queries = (queries) => {
+    return new Promise((resolve, reject) => {
+        const pQueries = [];
+        queries.forEach(q => pQueries.push(query(q.query, q.params)));
+        Promise.all(pQueries)
+            .then((res) => resolve(res))
+            .catch(e => reject(new CustomError(e, "queriesHandler queries")));
+    });
+};
+
+module.exports = {
+    query,
+    queries
+};
