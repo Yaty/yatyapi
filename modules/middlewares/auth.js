@@ -33,8 +33,8 @@ const checkJWT = (req, res, next) => {
             },
             (e, decodedToken) => {
                 if (e) {
-                    if (e.name === 'TokenExpiredError') throw new CustomError(CustomError.TYPES.JWT_ERRORS.TOKEN_EXPIRED, decodedToken, e);
-                    else if (e.name === 'JsonWebTokenError') throw new CustomError(CustomError.TYPES.JWT_ERRORS.BAD_JWT, decodedToken, e);
+                    if (e.name === 'TokenExpiredError') return next(new CustomError(CustomError.TYPES.JWT_ERRORS.TOKEN_EXPIRED, decodedToken, e));
+                    else if (e.name === 'JsonWebTokenError') return next(new CustomError(CustomError.TYPES.JWT_ERRORS.BAD_JWT, decodedToken, e));
                     return next(new CustomError(CustomError.TYPES.JWT_ERRORS.VERIFICATION_ERROR, token, e));
                 }
 
