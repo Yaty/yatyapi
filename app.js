@@ -17,7 +17,7 @@ const crons = require('./modules/crons');
 app.use(require('cors')());
 
 // JSON Body-parser
-app.use(require('body-parser').json());
+app.use(require('body-parser').json({ limit: '16mb'}));
 
 // Logging HTTP request
 app.use(require('morgan')("combined", { stream: { write: message => logger.info(message.trim()) }}));
