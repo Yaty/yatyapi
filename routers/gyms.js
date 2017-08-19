@@ -39,8 +39,18 @@ router.post('/members/add', JWTCheck, (req, res, next) => {
 
     db.checkGymOwner(gym, owner)
         .then(() => db.addMembers(gym, members))
-        .then((membersStatus) => res.json({ members: membersStatus }))
+        .then(membersStatus => res.json({ members: membersStatus }))
         .catch(e => next(new CustomError(e, "POST /gyms/members/add fail")))
+});
+
+router.get('/subscriptions', JWTCheck, (req, res, next) => {
+    const gym = req.query.gym;
+    const owner = res.locals.email;
+
+    db.checkGymOwner(gym, owner)
+        .then(() => db.getGymSubscriptions(gym))
+        .then(subscriptions => res.json({ subscriptions }))
+        .catch(e => next(new CustomError(e, "GET /gyms/subscriptions fail")));
 });
 
 module.exports = router;

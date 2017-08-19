@@ -18,9 +18,9 @@ const checkJWT = (req, res, next) => {
             const auth = authHeader.split(' ');
             if (auth && auth.length === 2) {
                 if (auth[0] === 'Bearer') return auth[1];
-                else throw new CustomError(CustomError.TYPES.JWT_ERRORS.BAD_AUTHORIZATION_TYPE, authHeader);
-            } else throw new CustomError(CustomError.TYPES.JWT_ERRORS.UNKNOWN_AUTHORIZATION, authHeader);
-        } else throw new CustomError(CustomError.TYPES.JWT_ERRORS.UNDEFINED_AUTHORIZATION, authHeader);
+                else return next(new CustomError(CustomError.TYPES.JWT_ERRORS.BAD_AUTHORIZATION_TYPE, authHeader));
+            } else return next(new CustomError(CustomError.TYPES.JWT_ERRORS.UNKNOWN_AUTHORIZATION, authHeader));
+        } else return next(new CustomError(CustomError.TYPES.JWT_ERRORS.UNDEFINED_AUTHORIZATION, authHeader));
     };
 
     try {

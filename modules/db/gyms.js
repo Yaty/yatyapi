@@ -43,27 +43,40 @@ const getGyms = () => {
 
 const checkGymOwner = (gym, user) => {
     return new Promise((resolve, reject) => {
-       db.query('SELECT COUNT(*) AS counter FROM gyms_users WHERE gym_id=? AND user_email=?', [gym, user])
-           .then(res => {
-               const counter = Number(res[0].counter);
-               if (counter === 1) {
-                   return resolve();
-               } else if (counter > 1) {
-                   logger.warn('A user got multiples times a gym', { user, gym});
-                   return resolve();
-               } else {
-                   return reject(new CustomError(CustomError.TYPES.OTHERS.BAD_GYM_OWNER, "checkGymOwner"));
-               }
-           })
-           .catch(e => reject(new CustomError(e, "checkGymOwner")));
+       db.query('SELECT ' +
+           'COUNT(*) AS counter ' +
+           'FROM gyms_users ' +
+           'WHERE gym_id=? AND user_email=? ',
+           [gym, user]
+       )
+       .then(res => {
+           const counter = Number(res[0].counter);
+           if (counter === 1) {
+               return resolve();
+           } else if (counter > 1) {
+               logger.warn('A user got multiples times a gym', { user, gym});
+               return resolve();
+           } else {
+               return reject(new CustomError(CustomError.TYPES.OTHERS.BAD_GYM_OWNER, "checkGymOwner"));
+           }
+       })
+       .catch(e => reject(new CustomError(e, "checkGymOwner")));
     });
 };
 
 const getGymMembers = (gym) => {
     return new Promise((resolve, reject) => {
-       db.query('SELECT users.email, users.name, users.lastname, users.lastLogin FROM users JOIN gyms_users ON ( users.email = gyms_users.user_email ) WHERE gyms_users.gym_id = ?', [gym])
-           .then(res => resolve(res))
-           .catch(e => reject(new CustomError(e, "getGymMembers")));
+       db.query('SELECT ' +
+           'users.email, ' +
+           'users.name, ' +
+           'users.lastname, ' +
+           'users.lastLogin ' +
+           'FROM users JOIN gyms_users ON ( users.email = gyms_users.user_email ) ' +
+           'WHERE gyms_users.gym_id = ?',
+           [gym]
+       )
+       .then(res => resolve(res))
+       .catch(e => reject(new CustomError(e, "getGymMembers")));
     });
 };
 
@@ -121,9 +134,26 @@ const addMembers = (gym, members) => {
     });
 };
 
+const getGymSubscriptions = (gym) => {
+    return new Promise((resolve, reject) => {
+        db.query('SELECT ' +
+            'subscriptions.label, ' +
+            'subscriptions.description, ' +
+            'subscriptions.duration_in_days, ' +
+            'subscriptions.id ' +
+            'FROM gyms_subscriptions JOIN subscriptions ON ( gyms_subscriptions.subscription_id = subscriptions.id) ' +
+            'WHERE gyms_subscriptions.gym_id = ?',
+            [gym]
+        )
+        .then(resolve)
+        .catch(e => reject(new CustomError(e, "getGymSubscriptions")));
+    });
+};
+
 module.exports = {
     getGyms,
     checkGymOwner,
     getGymMembers,
-    addMembers
+    addMembers,
+    getGymSubscriptions
 };
