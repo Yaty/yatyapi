@@ -13,16 +13,13 @@ const CustomError = require('../modules/errors').CustomError;
 
 router.get('/', JWTCheck, (req, res, next) => {
     db.getGyms()
-        .then((gyms) => {
-            return res.json({ gyms });
-        })
-        .catch((e) => {
-            return next(new CustomError(e, "GET /gyms fail"));
-        });
+        .then(gyms => res.json({ gyms }))
+        .catch((e) => next(new CustomError(e, "GET /gyms fail")));
 });
 
 router.get('/members', JWTCheck, (req, res, next) => {
     // Check if he owns the gym then return users
+    console.log('lol', res.locals.email, req.query.gym)
     const owner = res.locals.email;
     const gym = req.query.gym;
 
@@ -51,6 +48,28 @@ router.get('/subscriptions', JWTCheck, (req, res, next) => {
         .then(() => db.getGymSubscriptions(gym))
         .then(subscriptions => res.json({ subscriptions }))
         .catch(e => next(new CustomError(e, "GET /gyms/subscriptions fail")));
+});
+
+router.put('/update', JWTCheck, (req, res, next) => {
+    const owner = res.locals.email;
+    const gym = req.body.gym;
+    const staff = req.body.staff;
+
+    db.checkGymOwner(gym.id, owner)
+        .then(() => db.updateGym(gym, staff))
+        .then(() => res.sendStatus(200))
+        .catch(e => next(new CustomError(e, "PUT /gyms/update fail")));
+});
+
+// Need to be last
+router.get('/:gym', JWTCheck, (req, res, next) => {
+    const owner = res.locals.email;
+    const gym = req.params.gym;
+
+    db.checkGymOwner(gym, owner)
+        .then(() => db.getGymInfo(gym))
+        .then(gymInfo => res.json(gymInfo))
+        .catch(e => next(new CustomError(e, "GET /:gym fail " + gym)));
 });
 
 module.exports = router;

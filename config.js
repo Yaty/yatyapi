@@ -44,6 +44,7 @@ const errors = {
         APPLY_ERROR: { name: "APPLY_ERROR", msg: "Occur when the applied function has throw an error.", code: 500 },
         BAD_GYM_OWNER: { name: "BAD_GYM_OWNER", msg: "Occur when someone pretend to own a gym and doesn't.", code: 403 },
         INVALID_USERS: { name: "INVALID_USERS", msg: "Occur when trying to add invalid users.", code: 400 },
+        INVALID_GYM: { name: "INVALID_GYM", msg: "Occur when a gym field is undefined.", code: 400 },
     }
 };
 
