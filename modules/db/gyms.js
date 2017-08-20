@@ -167,7 +167,7 @@ const getGymInfo = (gym) => {
     return new Promise((resolve, reject) => {
         // TODO : Return only the displayed fields
         const gymInfoQuery = {
-            query: 'SELECT gyms.id, gyms.name, gyms.street_number, gyms.street_name, gyms.postal_code, gyms.city, gyms.country, gyms.phone_number1, gyms.phone_number2, gyms.description, gyms.logo, gyms.email ' +
+            query: 'SELECT gyms.logo, gyms.id, gyms.name, gyms.street_number, gyms.street_name, gyms.postal_code, gyms.city, gyms.country, gyms.phone_number1, gyms.phone_number2, gyms.description, gyms.email ' +
             'FROM gyms WHERE id = ?',
             params: [gym]
         };
@@ -180,25 +180,22 @@ const getGymInfo = (gym) => {
         };
 
         db.queries([gymInfoQuery, gymStaffQuery])
-            .then(res => resolve({ gym: res[0][0], staff: res[1]}))
+            .then(res => resolve({ gym: res[0][0], staff: res[1], logo: !!res[0][0].logo }))
             .catch(e => reject(new CustomError(e, "getGymInfo")));
     });
 };
 
 const updateGym = (gym, staff) => {
     return new Promise((resolve, reject) => {
-        console.log(gym)
-        const isGymValid = gym.hasOwnProperty('name') && gym.hasOwnProperty('description') && gym.hasOwnProperty('logo') && gym.hasOwnProperty('email') && gym.hasOwnProperty('phone_number1') && gym.hasOwnProperty('phone_number2') && gym.hasOwnProperty('street_number') && gym.hasOwnProperty('street_name') && gym.hasOwnProperty('postal_code') && gym.hasOwnProperty('city') && gym.hasOwnProperty('country') && gym.hasOwnProperty('id') && gym.id;
+        const isGymValid = gym.hasOwnProperty('name') && gym.hasOwnProperty('description') && gym.hasOwnProperty('email') && gym.hasOwnProperty('phone_number1') && gym.hasOwnProperty('phone_number2') && gym.hasOwnProperty('street_number') && gym.hasOwnProperty('street_name') && gym.hasOwnProperty('postal_code') && gym.hasOwnProperty('city') && gym.hasOwnProperty('country') && gym.hasOwnProperty('id') && gym.id;
         if (!isGymValid) return reject(new CustomError(CustomError.TYPES.OTHERS.INVALID_GYM, "updateGym"));
 
         const gymUpdateQuery = {
             query: 'UPDATE gyms ' +
-            'SET name = ?, description = ?, logo = ?, email = ?, phone_number1 = ?, phone_number2 = ?, street_number = ?, street_name = ?, postal_code = ?, city = ?, country = ? ' +
+            'SET name = ?, description = ?, email = ?, phone_number1 = ?, phone_number2 = ?, street_number = ?, street_name = ?, postal_code = ?, city = ?, country = ? ' +
             'WHERE id = ?',
-            params: [gym.name, gym.description, gym.logo, gym.email, gym.phone_number1, gym.phone_number2, gym.street_number, gym.street_name, gym.postal_code, gym.city, gym.country, gym.id]
+            params: [gym.name, gym.description, gym.email, gym.phone_number1, gym.phone_number2, gym.street_number, gym.street_name, gym.postal_code, gym.city, gym.country, gym.id]
         };
-
-        console.log(gymUpdateQuery)
 
         const gymStaffUpdateQueries = [];
 
@@ -223,6 +220,22 @@ const updateGym = (gym, staff) => {
     });
 };
 
+const getGymLogo = (gym) => {
+    return new Promise((resolve, reject) => {
+       db.query('SELECT logo FROM gyms WHERE id = ?', [gym])
+           .then(res => resolve(res[0].logo.toString('utf-8')))
+           .catch(e => reject(new CustomError(e, "getGymLogo")));
+    });
+};
+
+const setGymLogo = (gym, logo) => {
+    return new Promise((resolve, reject) => {
+        db.query('UPDATE gyms SET logo = ? WHERE id = ?', [logo, gym])
+            .then(resolve)
+            .then(e => reject(new CustomError(e, "setGymLogo")));
+    });
+};
+
 module.exports = {
     getGyms,
     checkGymOwner,
@@ -230,5 +243,7 @@ module.exports = {
     addMembers,
     getGymSubscriptions,
     getGymInfo,
-    updateGym
+    updateGym,
+    getGymLogo,
+    setGymLogo
 };

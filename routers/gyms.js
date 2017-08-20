@@ -61,6 +61,27 @@ router.put('/update', JWTCheck, (req, res, next) => {
         .catch(e => next(new CustomError(e, "PUT /gyms/update fail")));
 });
 
+router.put('/update/logo', JWTCheck, (req, res, next) => {
+    const owner = res.locals.email;
+    const gym = req.body.gym;
+    const logo = req.body.logo;
+
+    db.checkGymOwner(gym, owner)
+        .then(() => db.setGymLogo(gym, logo))
+        .then(() => res.sendStatus(200))
+        .catch(e => next(new CustomError(e, "PUT /gyms/update/logo fail")));
+});
+
+router.get('/:gym/logo', JWTCheck, (req, res, next) => {
+    const owner = res.locals.email;
+    const gym = req.params.gym;
+
+    db.checkGymOwner(gym, owner)
+        .then(() => db.getGymLogo(gym))
+        .then(logo => res.json(logo))
+        .catch(e => next(new CustomError(e, "GET /:gym/logo fail " + gym)));
+});
+
 // Need to be last
 router.get('/:gym', JWTCheck, (req, res, next) => {
     const owner = res.locals.email;
