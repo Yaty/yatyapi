@@ -81,6 +81,7 @@ const getGymMembers = (gym) => {
 };
 
 // TODO : Send a mail to member.email with a validation code to able him to access his account
+// TODO : Validation !
 const addMembers = (gym, members) => {
     return new Promise((resolve, reject) => {
         const insertInUsersColumns = ['email', 'name', 'lastname'];
@@ -89,47 +90,57 @@ const addMembers = (gym, members) => {
             params: []
         };
 
-        const insertInGymsUsersColumns = ['gym_id', 'user_email'];
+        const insertInGymsUsersColumns = ['gym_id', 'user_email', 'role'];
         const insertInGymsUsers = {
             query: 'INSERT INTO gyms_users (' + insertInGymsUsersColumns.toString() + ') VALUES ',
             params: []
         };
 
+        const insertInUsersSubscriptionsColumns = ['subscription_id', 'user_email', 'start_date', 'end_date'];
+        const insertInUsersSubscriptions = {
+            query: 'INSERT INTO users_subscriptions (' + insertInUsersSubscriptionsColumns.toString() + ') VALUES ',
+            params: []
+        };
+
+        const toMySQLDate = (date) => date.toISOString().slice(0, 19).replace('T', ' '); // TODO : find a away to deal with the timezone of the user since we are removing him from there
+
         for (let i = 0; i < members.length; i++) {
             let member = members[i];
-            if (member.hasOwnProperty('email') && member.hasOwnProperty('name') && member.hasOwnProperty('lastname') && gym) {
+            if (member.hasOwnProperty('email') && member.hasOwnProperty('name') && member.hasOwnProperty('lastname') && member.hasOwnProperty('subscription') && member.subscription.hasOwnProperty('id') && member.subscription.hasOwnProperty('duration_in_days') && gym) {
                 insertInUsers.query += i === members.length - 1 ? '(?, ?, ?)' : '(?, ?, ?), ';
                 insertInUsers.params.push(member.email, member.name, member.lastname);
 
-                insertInGymsUsers.query += i === members.length - 1 ? '(?, ?)' : '(?, ?), ';
-                insertInGymsUsers.params.push(gym, member.email);
+                insertInGymsUsers.query += i === members.length - 1 ? '(?, ?, ?)' : '(?, ?, ?), ';
+                insertInGymsUsers.params.push(gym, member.email, member.role);
+
+                let now = new Date();
+                let endOfSubscription = new Date(new Date().setDate(now.getDate() + member.subscription.duration_in_days));
+                insertInUsersSubscriptions.query += i === members.length - 1 ? '(?, ?, ?, ?)' : '(?, ?, ?, ?), ';
+                insertInUsersSubscriptions.params.push(
+                    member.subscription.id,
+                    member.email,
+                    toMySQLDate(now),
+                    toMySQLDate(endOfSubscription)
+                )
             } else {
                 logger.info('A user will not be added (addMembers) :', { member, gym });
                 member.created = false
             }
         }
 
-        if (insertInUsers.params.length > 0 && insertInGymsUsers.params.length > 0) {
-            db.queries([insertInUsers, insertInGymsUsers])
+        if (insertInUsers.params.length > 0 && insertInGymsUsers.params.length > 0 && insertInUsersSubscriptions.params.length > 0) {
+            db.query(insertInUsers.query, insertInUsers.params)
                 .then(res => {
-                    if (Number(res[0].affectedRows) === insertInUsers.params.length/insertInUsersColumns.length && Number(res[1].affectedRows) === insertInGymsUsers.params.length/insertInGymsUsersColumns.length) {
-                        // All members are created
-                        members.forEach(member => {
-                            if (!member.created) {
-                                member.created = true
-                            }
-                        });
-                    } else {
-                        // Some members aren't created, we can't know which so we set that to null
-                        members.forEach(member => {
-                            if (member.created !== false) {
-                                member.created = null
-                            }
-                        });
-                    }
-                    return resolve(members);
+                    const allMembersAddedInUsers = res.affectedRows === insertInUsers.params.length/insertInUsersColumns.length;
+                    members.forEach(member => member.created = allMembersAddedInUsers);
+                    return db.queries([insertInGymsUsers, insertInUsersSubscriptions])
                 })
-                .catch(e => reject(new CustomError(e, "addMembers")));
+                .then(res => {
+                    const allMembersAddedInGymsUsers = res[0].affectedRows === insertInGymsUsers.params.length/insertInGymsUsersColumns.length;
+                    const allMembersAddedInUsersSubscriptions = res[1].affectedRows === insertInUsersSubscriptions.params.length/insertInUsersSubscriptionsColumns.length;
+                    if (!allMembersAddedInGymsUsers || allMembersAddedInUsersSubscriptions) logger.warn('Some users will not have a subscription or a gym', res);
+                    return resolve(members);
+                }).catch(e => reject(new CustomError(e, "addMembers")));
         } else return reject(new CustomError(CustomError.TYPES.OTHERS.INVALID_USERS, "addMembers"));
     });
 };

@@ -20,4 +20,10 @@ router.post('/gym', JWTCheck, (req, res, next) => {
         .catch(e => next(new CustomError(e, "POST /users/gym")));
 });
 
+router.get('/roles', JWTCheck, (req, res, next) => {
+   db.getRoles()
+       .then(roles => res.json(roles))
+       .catch(e => next(new CustomError(e, "GET /users/roles")));
+});
+
 module.exports = router;

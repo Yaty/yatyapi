@@ -42,10 +42,8 @@ router.post('/members/add', JWTCheck, (req, res, next) => {
 
 router.get('/subscriptions', JWTCheck, (req, res, next) => {
     const gym = req.query.gym;
-    const owner = res.locals.email;
 
-    db.checkGymOwner(gym, owner)
-        .then(() => db.getGymSubscriptions(gym))
+    db.getGymSubscriptions(gym)
         .then(subscriptions => res.json({ subscriptions }))
         .catch(e => next(new CustomError(e, "GET /gyms/subscriptions fail")));
 });

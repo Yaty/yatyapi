@@ -126,10 +126,22 @@ const addGymToUser = (gym, email) => {
     });
 };
 
+const getRoles = () => {
+  return new Promise((resolve, reject) => {
+      db.query("SELECT COLUMN_TYPE, COLUMN_DEFAULT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'gyms_users' AND COLUMN_NAME = 'role'")
+          .then(res => resolve({
+              roles: res[0]['COLUMN_TYPE'].replace('enum(', '').replace(')', '').replace(/'/g, '').split(','),
+              'default': res[0]['COLUMN_DEFAULT']
+          }))
+          .catch(e => reject(new CustomError(e, "getRoles")));
+  });
+};
+
 module.exports = {
     login,
     register,
     getUserInfo,
     addGymToUser,
-    getUserGyms
+    getUserGyms,
+    getRoles
 };
