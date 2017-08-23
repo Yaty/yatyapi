@@ -6,9 +6,13 @@ Written by Hugo Da Roit <contact@hdaroit.fr>, 2017
 Based on Vue-admin from Fangdun Cai <cfddream@gmail.com>
 */
 
+// TODO : Validation
+// TODO : Caching
+
 const config = require('./config');
 const logger = require('./modules/logger');
 const express = require('express');
+const validator = require('express-validator');
 const routers = require('./routers');
 const app = express();
 const crons = require('./modules/crons');
@@ -18,6 +22,7 @@ app.use(require('cors')());
 
 // JSON Body-parser
 app.use(require('body-parser').json({ limit: '16mb'}));
+app.use(validator());
 
 // Logging HTTP request
 app.use(require('morgan')("combined", { stream: { write: message => logger.info(message.trim()) }}));

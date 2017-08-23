@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../../config');
 const logger = require('../logger');
 const CustomError = require('../errors/').CustomError;
+const validator = require('validator');
 
 const checkJWT = (req, res, next) => {
     const getTokenFromHeaders = headers => {
@@ -40,6 +41,12 @@ const checkJWT = (req, res, next) => {
 
                 logger.debug("Access granted to " + decodedToken.email + " for " + req.originalUrl);
                 res.locals.email = decodedToken.email;
+
+                if (!validator.isEmail(res.locals.email)) {
+                    logger.warn('The email is wrong in the JWT Payload', { email: res.locals.email });
+                    return next(new CustomError(CustomError.TYPES.JWT_ERRORS.VERIFICATION_ERROR, 'Bad email ' + res.locals.email));
+                }
+
                 return next();
             });
     } catch (e) {

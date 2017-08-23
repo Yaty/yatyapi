@@ -12,7 +12,7 @@ class CustomError {
         if (type instanceof CustomError) {
             this._type = type.type;
             this._message = (message ? ' / ' + message : '') + type.message ;
-            this._error = (error ? ' / ' + error : '') + type.error;
+            this._error = (error ? ' / ' : '') + error;
         // If type.name, msg and code is defined we suppose it's a defined error type (see TYPES)
         } else if (type.name && type.msg && type.code) {
             this._type = type;

@@ -14,7 +14,15 @@ const CustomError = require('../modules/errors').CustomError;
 router.post('/gym', JWTCheck, (req, res, next) => {
     const gymId = req.body.gymId;
     const user = req.body.email;
-    db.addGymToUser(gymId, user)
+
+    req.checkBody('email').isEmail();
+    req.checkBody('gymId').isInt();
+
+    req.getValidationResult()
+        .then(result => {
+            if (!result.isEmpty()) throw new CustomError(CustomError.TYPES.OTHERS.VALIDATION_ERROR, `Validation error ${JSON.stringify(result.array())}`);
+            else return db.addGymToUser(gymId, user)
+        })
         .then(() => db.getUserGyms(user))
         .then(gyms => res.json({ gyms }))
         .catch(e => next(new CustomError(e, "POST /users/gym")));

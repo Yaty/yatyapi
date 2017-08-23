@@ -8,13 +8,11 @@ Based on Vue-admin from Fangdun Cai <cfddream@gmail.com>
 
 const CustomError = require('../errors').CustomError;
 const NodeCache = require( "node-cache" );
-const cache = new NodeCache();
 const db = require('./queriesHandler');
 const logger = require('../logger')
 
 const getGyms = () => {
     return new Promise((resolve ,reject) => {
-        // TODO : caching with NodeCache, reset cache when new entry or deletion !!!
         db.query('SELECT id, name FROM gyms')
             .then(resolve)
             .catch(e => reject(new CustomError(e, "getGyms")));
@@ -138,7 +136,7 @@ const addMembers = (gym, members) => {
                 .then(res => {
                     const allMembersAddedInGymsUsers = res[0].affectedRows === insertInGymsUsers.params.length/insertInGymsUsersColumns.length;
                     const allMembersAddedInUsersSubscriptions = res[1].affectedRows === insertInUsersSubscriptions.params.length/insertInUsersSubscriptionsColumns.length;
-                    if (!allMembersAddedInGymsUsers || allMembersAddedInUsersSubscriptions) logger.warn('Some users will not have a subscription or a gym', res);
+                    if (!allMembersAddedInGymsUsers || allMembersAddedInUsersSubscriptions) logger.warn('Some users will not have a subscription or a gym', { res, gym, member });
                     return resolve(members);
                 }).catch(e => reject(new CustomError(e, "addMembers")));
         } else return reject(new CustomError(CustomError.TYPES.OTHERS.INVALID_USERS, "addMembers"));
