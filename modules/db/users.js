@@ -13,6 +13,8 @@ const db = require('./queriesHandler');
 const bcrypt = require('bcrypt');
 const SALT_WORK_FACTOR = 10;
 
+// TODO : USE VALIDATOR.JS FOR EMBEDDED FIELDS (primary fields are already checked)
+
 const getUser = (email) => {
     return new Promise((resolve, reject) => {
         db.query('SELECT * FROM users WHERE email=?', [email])
