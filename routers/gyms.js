@@ -71,7 +71,7 @@ router.put('/update', JWTCheck, (req, res, next) => {
     const staff = req.body.staff;
 
     req.checkBody('gym').isObject();
-    req.checkBody('gym', 'id').isInt();
+    req.checkBody('gym.id').isInt();
     req.checkBody('staff').isArray();
 
     req.getValidationResult()
@@ -106,7 +106,7 @@ router.get('/:gym/logo', JWTCheck, (req, res, next) => {
     const owner = res.locals.email;
     const gym = req.params.gym;
 
-    req.checkBody('gym').isInt();
+    req.checkParams('gym').isInt();
 
     req.getValidationResult()
         .then(result => {

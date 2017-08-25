@@ -22,7 +22,16 @@ app.use(require('cors')());
 
 // JSON Body-parser
 app.use(require('body-parser').json({ limit: '16mb'}));
-app.use(validator());
+app.use(validator({
+    customValidators: {
+        isArray: (value) => {
+            return Array.isArray(value);
+        },
+        isObject: (value) => {
+            return typeof value === 'object';
+        }
+    }
+}));
 
 // Logging HTTP request
 app.use(require('morgan')("combined", { stream: { write: message => logger.info(message.trim()) }}));

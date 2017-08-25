@@ -174,9 +174,8 @@ const getGymSubscriptions = (gym) => {
  */
 const getGymInfo = (gym) => {
     return new Promise((resolve, reject) => {
-        // TODO : Return only the displayed fields
         const gymInfoQuery = {
-            query: 'SELECT gyms.logo, gyms.id, gyms.name, gyms.street_number, gyms.street_name, gyms.postal_code, gyms.city, gyms.country, gyms.phone_number1, gyms.phone_number2, gyms.description, gyms.email ' +
+            query: 'SELECT gyms.id, gyms.name, gyms.street_number, gyms.street_name, gyms.postal_code, gyms.city, gyms.country, gyms.phone_number1, gyms.phone_number2, gyms.description, gyms.email ' +
             'FROM gyms WHERE id = ?',
             params: [gym]
         };
@@ -188,8 +187,13 @@ const getGymInfo = (gym) => {
             params: [gym]
         };
 
-        db.queries([gymInfoQuery, gymStaffQuery])
-            .then(res => resolve({ gym: res[0][0], staff: res[1], logo: !!res[0][0].logo }))
+        const logoExists = {
+            query: 'SELECT gyms.logo FROM gyms WHERE id = ?',
+            params: [gym]
+        };
+
+        db.queries([gymInfoQuery, gymStaffQuery, logoExists])
+            .then(res => resolve({ gym: res[0][0], staff: res[1], logo: !!res[2][0].logo }))
             .catch(e => reject(new CustomError(e, "getGymInfo")));
     });
 };

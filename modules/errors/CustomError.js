@@ -6,12 +6,13 @@ Written by Hugo Da Roit <contact@hdaroit.fr>, 2017
 Based on Vue-admin from Fangdun Cai <cfddream@gmail.com>
 */
 
-class CustomError {
+class CustomError extends Error {
     constructor (type, message, error) {
+        super(type.message || message)
         // If it's already a CustomError we make a shallow copy
         if (type instanceof CustomError) {
             this._type = type.type;
-            this._message = (message ? ' / ' + message : '') + type.message ;
+            this._message = (message ? ' / ' + message : '') + type.message;
             this._error = (error ? ' / ' : '') + error;
         // If type.name, msg and code is defined we suppose it's a defined error type (see TYPES)
         } else if (type.name && type.msg && type.code) {
