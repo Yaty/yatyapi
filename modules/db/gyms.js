@@ -233,6 +233,13 @@ const updateGym = (gym, staff) => {
     });
 };
 
+const updateGymSubscriptions = (gym, subscriptions) => {
+  return new Promise((resolve, reject) => {
+     resolve();
+     // TODO
+  });
+};
+
 const getGymLogo = (gym) => {
     return new Promise((resolve, reject) => {
        db.query('SELECT logo FROM gyms WHERE id = ?', [gym])
@@ -257,6 +264,7 @@ module.exports = {
     getGymSubscriptions,
     getGymInfo,
     updateGym,
+    updateGymSubscriptions,
     getGymLogo,
     setGymLogo
 };

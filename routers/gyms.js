@@ -65,6 +65,23 @@ router.get('/subscriptions', JWTCheck, (req, res, next) => {
         .catch(e => next(new CustomError(e, "GET /gyms/subscriptions fail")));
 });
 
+router.put('/subscriptions', JWTCheck, (req, res, next) => {
+    const gym = req.body.gym;
+    const subscriptions = req.body.subscriptions;
+
+    req.checkBody('gym').isInt();
+    req.checkBody('subscriptions').isArray();
+
+    req.getValidationResult()
+        .then(result => {
+            if (!result.isEmpty()) throw new CustomError(CustomError.TYPES.OTHERS.VALIDATION_ERROR, `Validation error ${JSON.stringify(result.array())}`);
+            else return db.checkGymOwner(gym.id, owner);
+        })
+        .then(() => db.updateGymSubscriptions(gym, subscriptions))
+        .then(() => res.sendStatus(200))
+        .catch(e => next(new CustomError(e, "PUT /gyms/update fail")));
+});
+
 router.put('/update', JWTCheck, (req, res, next) => {
     const owner = res.locals.email;
     const gym = req.body.gym;
