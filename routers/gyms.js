@@ -68,14 +68,17 @@ router.get('/subscriptions', JWTCheck, (req, res, next) => {
 router.put('/subscriptions', JWTCheck, (req, res, next) => {
     const gym = req.body.gym;
     const subscriptions = req.body.subscriptions;
+    const owner = res.locals.email;
 
     req.checkBody('gym').isInt();
     req.checkBody('subscriptions').isArray();
 
+    // TODO subscriptions validations : https://github.com/ctavan/express-validator/issues/125#issuecomment-91363539
+
     req.getValidationResult()
         .then(result => {
             if (!result.isEmpty()) throw new CustomError(CustomError.TYPES.OTHERS.VALIDATION_ERROR, `Validation error ${JSON.stringify(result.array())}`);
-            else return db.checkGymOwner(gym.id, owner);
+            else return db.checkGymOwner(gym, owner);
         })
         .then(() => db.updateGymSubscriptions(gym, subscriptions))
         .then(() => res.sendStatus(200))
@@ -90,6 +93,8 @@ router.put('/update', JWTCheck, (req, res, next) => {
     req.checkBody('gym').isObject();
     req.checkBody('gym.id').isInt();
     req.checkBody('staff').isArray();
+
+    // TODO, staff and gym validation
 
     req.getValidationResult()
         .then(result => {

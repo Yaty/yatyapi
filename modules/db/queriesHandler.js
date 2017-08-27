@@ -24,9 +24,9 @@ const query = (query, params) => {
         getConnection()
             .then(connection => {
                 connection.query(query, params, (err, res, fields) => {
-                    if (err) return reject(new CustomError(CustomError.TYPES.MYSQL_ERRORS.QUERY_ERROR, "query", err));
+                    if (err) reject(new CustomError(CustomError.TYPES.MYSQL_ERRORS.QUERY_ERROR, "query", err + ' - ' + err.sql));
+                    else resolve(res);
                     connection.release();
-                    return resolve(res);
                 });
             })
             .catch(e => reject(new CustomError(e, "queriesHandler execQuery")))

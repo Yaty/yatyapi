@@ -233,10 +233,77 @@ const updateGym = (gym, staff) => {
     });
 };
 
+/**
+ * Update a gym subscriptions by first adding the subscriptions in table if it doesn't exist
+ * If it exist it just update it
+ * By default every sub of a gym will be updated, mysql is not a dick and will not update thoses rows if they didn't changed
+ * @param gym
+ * @param subscriptions
+ * @returns {Promise}
+ */
 const updateGymSubscriptions = (gym, subscriptions) => {
   return new Promise((resolve, reject) => {
-     resolve();
-     // TODO
+      const createSubscriptions = {
+          query: 'INSERT INTO subscriptions (label, description, duration_in_days) VALUES ?',
+          params: [[]]
+      };
+
+      const updateSubscriptions = {
+          query: 'INSERT INTO subscriptions (label, description, duration_in_days, id) VALUES ? ON DUPLICATE KEY UPDATE label = VALUES(label), description = VALUES(description), duration_in_days = VALUES(duration_in_days), id = VALUES(id)',
+          params: [[]]
+      };
+
+      subscriptions.forEach(subscription => {
+          if (subscription.hasOwnProperty('label') && subscription.hasOwnProperty('description') && subscription.hasOwnProperty('duration_in_days')) {
+              if (subscription.hasOwnProperty('new') && subscription.new === true) {
+                  // Create
+                  createSubscriptions.params[0].push([subscription.label, subscription.description, subscription.duration_in_days]);
+                  subscription.status = 'created';
+              } else if (subscription.hasOwnProperty('id') && subscription.id) {
+                  // Update
+                  updateSubscriptions.params[0].push([subscription.label, subscription.description, subscription.duration_in_days, subscription.id]);
+                  subscription.status = 'updated'
+              } else {
+                  logger.warn('Invalid subscription updateGymSubscriptions', { subscription, gym });
+                  subscription.status = 'invalid_1';
+              }
+          } else {
+              subscription.status = 'invalid_2';
+          }
+      });
+
+      const queries = [];
+      let creating;
+
+      if (createSubscriptions.params[0].length > 0) {
+          queries.push(createSubscriptions);
+          creating = true;
+      }
+
+      if (updateSubscriptions.params[0].length > 0) queries.push(updateSubscriptions);
+
+      if (queries.length === 0) return resolve(); // nothing to insert or update
+
+      db.queries(queries)
+          .then(res => {
+              if (creating) { // If subscriptions have been added we have to link them with the gym
+                  const insertIdFirst = res[0].insertId; // the query to insert new sub is always at index 0
+                  const insertIdLast = insertIdFirst + (updateSubscriptions.params[0].length - 1);
+                  const values = [];
+
+                  for (let i = insertIdFirst; i <= insertIdLast; i++) {
+                      values.push([gym, i]);
+                  }
+                  console.log('DONE1');
+                  return db.query('INSERT INTO gyms_subscriptions (gym_id, subscription_id) VALUES ?', [values])
+              } else { // Update or something else, we just resolve
+                  resolve();
+              }
+          })
+          .then(res => {
+              resolve();
+          })
+          .catch(e => reject(new CustomError(e, "updateGymSubscriptions")));
   });
 };
 
