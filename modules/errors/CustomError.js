@@ -8,7 +8,7 @@ Based on Vue-admin from Fangdun Cai <cfddream@gmail.com>
 
 class CustomError extends Error {
     constructor (type, message, error) {
-        super()
+        super();
         // If it's already a CustomError we make a shallow copy
         if (type instanceof CustomError) {
             this._type = type.type;
