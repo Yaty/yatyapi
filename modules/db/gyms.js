@@ -68,8 +68,12 @@ const getGymMembers = (gym) => {
            'users.email, ' +
            'users.name, ' +
            'users.lastname, ' +
-           'users.lastLogin ' +
-           'FROM users JOIN gyms_users ON ( users.email = gyms_users.user_email ) ' +
+           'users.lastLogin, ' +
+           'subscriptions.label as subscription ' +
+           'FROM users ' +
+           'JOIN gyms_users ON ( users.email = gyms_users.user_email ) ' +
+           'JOIN users_subscriptions ON ( users.email = users_subscriptions.user_email ) ' +
+           'JOIN subscriptions ON ( users_subscriptions.subscription_id = subscriptions.id ) ' +
            'WHERE gyms_users.gym_id = ?',
            [gym]
        )
@@ -80,6 +84,7 @@ const getGymMembers = (gym) => {
 
 // TODO : Send a mail to member.email with a validation code to able him to access his account
 // TODO : Validation !
+// TODO : Rewrite using nested array for queries
 const addMembers = (gym, members) => {
     return new Promise((resolve, reject) => {
         const insertInUsersColumns = ['email', 'name', 'lastname'];
@@ -136,7 +141,7 @@ const addMembers = (gym, members) => {
                 .then(res => {
                     const allMembersAddedInGymsUsers = res[0].affectedRows === insertInGymsUsers.params.length/insertInGymsUsersColumns.length;
                     const allMembersAddedInUsersSubscriptions = res[1].affectedRows === insertInUsersSubscriptions.params.length/insertInUsersSubscriptionsColumns.length;
-                    if (!allMembersAddedInGymsUsers || allMembersAddedInUsersSubscriptions) logger.warn('Some users will not have a subscription or a gym', { res, gym, member });
+                    if (!allMembersAddedInGymsUsers || !allMembersAddedInUsersSubscriptions) logger.warn('Some users will not have a subscription or a gym', { res, gym, member });
                     return resolve(members);
                 }).catch(e => reject(new CustomError(e, "addMembers")));
         } else return reject(new CustomError(CustomError.TYPES.OTHERS.INVALID_USERS, "addMembers"));
